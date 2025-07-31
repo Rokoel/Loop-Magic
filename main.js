@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	
 	engine.addGameObject(new Box(600, 450, 50, 50, 1, 0.95)); // Stacked box (bottom)
 	engine.addGameObject(new Box(600, 400, 50, 50, 1, 0.95)); // Stacked box (top)
+	engine.addGameObject(new Box(600, 350, 50, 50, 1, 0.95)); // Stacked box (top)
 
 	// Set camera to follow the player
 	engine.camera.follow(player);

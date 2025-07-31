@@ -89,7 +89,7 @@ export default class Physics {
 	handleCollisions(obj, allObjects, deltaTime) {
 		obj.isGrounded = false;
 		let remainingTime = 1;
-		let maxIterations = 10; // Increased for better stack resolution
+		let maxIterations = 5; // Increased for better stack resolution
 
 		// First, handle any existing overlaps by separating objects
 		this.separateOverlappingObjects(obj, allObjects);
@@ -181,28 +181,32 @@ export default class Physics {
 				const box1 = obj.getAABB();
 				const box2 = other.getAABB();
 
-				// Check for slight overlap or contact
-				if (
-					box1.max.x > box2.min.x &&
-					box1.min.x < box2.max.x &&
-					box1.max.y > box2.min.y + 1 && // Slight tolerance for contact
-					box1.min.y < box2.max.y
-				) {
-					// Calculate normal (assuming vertical contact for stacking)
-					const normal = new Vector2D(0, -1); // Upward normal for bottom object pushing up
+				// Calculate overlap (positive if penetrating)
+				const overlapY = box1.max.y - box2.min.y;
+				const overlapX = Math.min(box1.max.x - box2.min.x, box2.max.x - box1.min.x);
 
-					// Apply small corrective impulse to counteract gravity
-					const correctiveImpulse = this.gravity.scale(obj.mass * deltaTime * 0.5); // Half gravity for stability
-					obj.velocity = obj.velocity.subtract(correctiveImpulse.scale(1 / obj.mass));
+				// Check for vertical contact with slight penetration tolerance
+				if (overlapX > 0 && overlapY > 0 && overlapY < 2 && box1.min.y < box2.max.y) {
+					// Assuming vertical contact for stacking (normal points upward)
+					const normal = new Vector2D(0, -1);
 
-					// Set grounded if resting on something
-					if (Math.abs(obj.velocity.y) < 1) { // Nearly at rest
-						obj.isGrounded = true;
+					// Only apply if nearly at rest vertically to avoid initial oscillation
+					if (Math.abs(obj.velocity.y) < 5) {
+						// Small anti-gravity impulse to counteract sinking
+						const correctiveImpulse = this.gravity.scale(obj.mass * deltaTime * 0.2); // Reduced for less oscillation
+						obj.velocity = obj.velocity.subtract(correctiveImpulse.scale(1 / obj.mass));
+
+						// Damp vertical velocity to settle quickly
+						obj.velocity.y *= 0.9; // Damping factor
 					}
 
-					// Apply friction to prevent sliding
+					// Set grounded if resting
+					obj.isGrounded = true;
+
+					// Apply reduced friction for horizontal movement on top (allows walking)
 					if (Math.abs(obj.velocity.x) > 0) {
-						const frictionForce = obj.velocity.x * obj.friction * -1;
+						const reducedFriction = obj.friction * 0.5; // Less friction on movable surfaces for smooth walking
+						const frictionForce = obj.velocity.x * reducedFriction * -1;
 						obj.velocity.x += frictionForce * deltaTime;
 						if (Math.abs(obj.velocity.x) < 1) obj.velocity.x = 0;
 					}

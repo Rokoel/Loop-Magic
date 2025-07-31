@@ -20,8 +20,8 @@ export default class GameObject {
 
 		// Physics properties
 		this.isMovable = false;
-		this.mass = 1;
-		this.friction = 0.1; // Coefficient of friction
+		this.mass = 10;
+		this.friction = 0.9; // Coefficient of friction
 		this.forces = new Vector2D(0, 0);
 
 		// Collision properties
