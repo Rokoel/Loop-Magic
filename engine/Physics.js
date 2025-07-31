@@ -49,35 +49,35 @@ export default class Physics {
 	 * @param {Vector2D} normal - The collision normal.
 	 * @param {number} deltaTime - The frame's delta time.
 	 */
-	handleMovableCollision(obj1, obj2, normal, deltaTime) {
-		// Calculate relative velocity
-		const relativeVelocity = obj1.velocity.subtract(obj2.velocity);
-		const separatingVelocity = relativeVelocity.dot(normal);
+	handleMovableCollision(obj1, obj2, normal) {
+		// Relative velocity along the collision normal
+		const relVel = obj1.velocity.subtract(obj2.velocity);
+		const separatingVel = relVel.dot(normal);
 
-		// Don't resolve if objects are separating
-		if (separatingVelocity > 0) return;
+		if (separatingVel > 0) return; // already moving apart
 
-		// Calculate restitution (bounciness) - set to 0 for no bounce
-		const restitution = 0;
+		const invMass1 = 1 / obj1.mass;
+		const invMass2 = 1 / obj2.mass;
 
-		// Calculate collision impulse with a small bias for resting contacts
-		const bias = 0.1; // Small penetration correction factor
-		const impulseScalar = -(1 + restitution) * separatingVelocity / (1/obj1.mass + 1/obj2.mass) + bias;
+		// Perfectly inelastic (no bounce) impulse
+		const impulseMag = -separatingVel / (invMass1 + invMass2);
+		const impulse = normal.scale(impulseMag);
 
-		// Apply impulse to both objects
-		const impulse = normal.scale(impulseScalar);
-		
-		obj1.velocity = obj1.velocity.add(impulse.scale(1/obj1.mass));
-		obj2.velocity = obj2.velocity.subtract(impulse.scale(1/obj2.mass));
+		obj1.velocity = obj1.velocity.add(impulse.scale(invMass1));
+		obj2.velocity = obj2.velocity.subtract(impulse.scale(invMass2));
 
-		// Apply friction between the objects
-		const tangent = relativeVelocity.subtract(normal.scale(separatingVelocity)).normalize();
-		const frictionImpulse = Math.min(Math.abs(impulseScalar * obj1.friction * obj2.friction), 
-										Math.abs(relativeVelocity.dot(tangent)));
-		
-		const frictionVector = tangent.scale(frictionImpulse);
-		obj1.velocity = obj1.velocity.subtract(frictionVector.scale(1/obj1.mass));
-		obj2.velocity = obj2.velocity.add(frictionVector.scale(1/obj2.mass));
+		/* --------- tangential (friction) impulse ---------- */
+		// Skip tangential friction if contact is vertical (player on top of box)
+		if (Math.abs(normal.y) < 0.5) {
+			const tangent = relVel.subtract(normal.scale(separatingVel)).normalize();
+			const maxFriction = impulseMag * obj1.friction * obj2.friction;
+			const tangVel = relVel.dot(tangent);
+			const frictionMag = Math.max(-maxFriction, Math.min(maxFriction, -tangVel));
+
+			const frictionImpulse = tangent.scale(frictionMag);
+			obj1.velocity = obj1.velocity.add(frictionImpulse.scale(invMass1));
+			obj2.velocity = obj2.velocity.subtract(frictionImpulse.scale(invMass2));
+		}
 	}
 
 	/**
@@ -171,46 +171,38 @@ export default class Physics {
 	 * @param {Array<GameObject>} allObjects - All objects in the scene.
 	 * @param {number} deltaTime - The frame's delta time.
 	 */
-	resolveRestingContacts(allObjects, deltaTime) {
-		for (const obj of allObjects) {
-			if (!obj.isMovable) continue;
+	resolveRestingContacts(allObjects) {
+		const PEN_TOL = 5;   // positional tolerance (pixels)
+		const H_FRICTION = 0.1; // very light horizontal drag when resting
 
-			for (const other of allObjects) {
-				if (obj === other) continue;
+		for (const top of allObjects) {
+			if (!top.isMovable) continue;
 
-				const box1 = obj.getAABB();
-				const box2 = other.getAABB();
+			for (const bottom of allObjects) {
+				if (top === bottom) continue;
 
-				// Calculate overlap (positive if penetrating)
-				const overlapY = box1.max.y - box2.min.y;
-				const overlapX = Math.min(box1.max.x - box2.min.x, box2.max.x - box1.min.x);
+				const a = top.getAABB();
+				const b = bottom.getAABB();
 
-				// Check for vertical contact with slight penetration tolerance
-				if (overlapX > 0 && overlapY > 0 && overlapY < 2 && box1.min.y < box2.max.y) {
-					// Assuming vertical contact for stacking (normal points upward)
-					const normal = new Vector2D(0, -1);
+				// is top sitting (more or less) on bottom?
+				const overlapX = Math.min(a.max.x - b.min.x, b.max.x - a.min.x);
+				if (overlapX <= 0) continue; // no horizontal overlap
 
-					// Only apply if nearly at rest vertically to avoid initial oscillation
-					if (Math.abs(obj.velocity.y) < 5) {
-						// Small anti-gravity impulse to counteract sinking
-						const correctiveImpulse = this.gravity.scale(obj.mass * deltaTime * 0.2); // Reduced for less oscillation
-						obj.velocity = obj.velocity.subtract(correctiveImpulse.scale(1 / obj.mass));
+				const penetration = a.max.y - b.min.y;
+				if (penetration <= 0 || penetration > PEN_TOL) continue; // either no touch or too deep – the main solver will handle it
 
-						// Damp vertical velocity to settle quickly
-						obj.velocity.y *= 0.9; // Damping factor
-					}
+				/* --- positional correction -------------------------------- */
+				top.position.y -= penetration;      // pop the object up
+				top.velocity.y = 0;                 // kill vertical motion
+				top.isGrounded = true;              // allow jumping
+				if (bottom.isMovable) bottom.isSupport = true; // optional flag you can use elsewhere
 
-					// Set grounded if resting
-					obj.isGrounded = true;
-
-					// Apply reduced friction for horizontal movement on top (allows walking)
-					if (Math.abs(obj.velocity.x) > 0) {
-						const reducedFriction = obj.friction * 0.5; // Less friction on movable surfaces for smooth walking
-						const frictionForce = obj.velocity.x * reducedFriction * -1;
-						obj.velocity.x += frictionForce * deltaTime;
-						if (Math.abs(obj.velocity.x) < 1) obj.velocity.x = 0;
-					}
-				}
+				// /* --- minimal horizontal damping so stack does not slide off --- */
+				// if (Math.abs(top.velocity.x) < 5) {
+				// 	// only damp if object is almost idle (so player input is not cancelled)
+				// 	top.velocity.x *= (1 - H_FRICTION);
+				// 	if (Math.abs(top.velocity.x) < 0.5) top.velocity.x = 0;
+				// }
 			}
 		}
 	}
