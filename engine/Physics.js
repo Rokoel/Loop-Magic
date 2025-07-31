@@ -37,6 +37,9 @@ export default class Physics {
 			// Handle collisions and update position
 			this.handleCollisions(obj, objects, deltaTime);
 		}
+
+		// Resolve resting contacts after all movements (for stable stacking)
+		this.resolveRestingContacts(objects, deltaTime);
 	}
 
 	/**
@@ -57,8 +60,9 @@ export default class Physics {
 		// Calculate restitution (bounciness) - set to 0 for no bounce
 		const restitution = 0;
 
-		// Calculate collision impulse
-		const impulseScalar = -(1 + restitution) * separatingVelocity / (1/obj1.mass + 1/obj2.mass);
+		// Calculate collision impulse with a small bias for resting contacts
+		const bias = 0.1; // Small penetration correction factor
+		const impulseScalar = -(1 + restitution) * separatingVelocity / (1/obj1.mass + 1/obj2.mass) + bias;
 
 		// Apply impulse to both objects
 		const impulse = normal.scale(impulseScalar);
@@ -85,7 +89,7 @@ export default class Physics {
 	handleCollisions(obj, allObjects, deltaTime) {
 		obj.isGrounded = false;
 		let remainingTime = 1;
-		let maxIterations = 3; // Prevent infinite loops
+		let maxIterations = 10; // Increased for better stack resolution
 
 		// First, handle any existing overlaps by separating objects
 		this.separateOverlappingObjects(obj, allObjects);
@@ -158,6 +162,51 @@ export default class Physics {
 				remainingTime = Math.max(remainingTime, 0);
 			} else {
 				break;
+			}
+		}
+	}
+
+	/**
+	 * Resolves resting contacts for stable stacking (counteracts gravity on stacks).
+	 * @param {Array<GameObject>} allObjects - All objects in the scene.
+	 * @param {number} deltaTime - The frame's delta time.
+	 */
+	resolveRestingContacts(allObjects, deltaTime) {
+		for (const obj of allObjects) {
+			if (!obj.isMovable) continue;
+
+			for (const other of allObjects) {
+				if (obj === other) continue;
+
+				const box1 = obj.getAABB();
+				const box2 = other.getAABB();
+
+				// Check for slight overlap or contact
+				if (
+					box1.max.x > box2.min.x &&
+					box1.min.x < box2.max.x &&
+					box1.max.y > box2.min.y + 1 && // Slight tolerance for contact
+					box1.min.y < box2.max.y
+				) {
+					// Calculate normal (assuming vertical contact for stacking)
+					const normal = new Vector2D(0, -1); // Upward normal for bottom object pushing up
+
+					// Apply small corrective impulse to counteract gravity
+					const correctiveImpulse = this.gravity.scale(obj.mass * deltaTime * 0.5); // Half gravity for stability
+					obj.velocity = obj.velocity.subtract(correctiveImpulse.scale(1 / obj.mass));
+
+					// Set grounded if resting on something
+					if (Math.abs(obj.velocity.y) < 1) { // Nearly at rest
+						obj.isGrounded = true;
+					}
+
+					// Apply friction to prevent sliding
+					if (Math.abs(obj.velocity.x) > 0) {
+						const frictionForce = obj.velocity.x * obj.friction * -1;
+						obj.velocity.x += frictionForce * deltaTime;
+						if (Math.abs(obj.velocity.x) < 1) obj.velocity.x = 0;
+					}
+				}
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 import GameEngine from "./engine/GameEngine.js";
 import GameObject from "./engine/GameObject.js";
-import Vector2D from "./engine/Vector2D.js";
 
 // --- Custom Game Object Classes ---
 
@@ -46,15 +45,25 @@ class Platform extends GameObject {
 }
 
 class Box extends GameObject {
-	static count = 0; // Static counter for unique IDs
-
-	constructor(x, y, width, height) {
-		super(x, y, width, height, "saddlebrown");
-		this.id = `box_${Box.count++}`; // Unique ID for time travel
+	/**
+	 * A movable box that can be pushed, stacked, and used to push other objects.
+	 * @param {number} x - The initial x-coordinate.
+	 * @param {number} y - The initial y-coordinate.
+	 * @param {number} width - The width of the box.
+	 * @param {number} height - The height of the box.
+	 * @param {number} [mass=2] - The mass of the box (higher mass makes it harder to push).
+	 * @param {number} [friction=0.8] - The friction coefficient (higher for better stacking stability).
+	 * @param {string} [color='#8B4513'] - The color of the box for debugging.
+	 */
+	constructor(x, y, width, height, mass = 2, friction = 0.8, color = "#8B4513") {
+		super(x, y, width, height, color);
+		this.id = `box_${Math.random().toString(36).substr(2, 9)}`; // Unique ID for time travel
 		this.isMovable = true;
-		this.mass = 2; // Heavier than the player
-		this.friction = 0.5; // Moderate friction
+		this.mass = mass;
+		this.friction = friction;
 	}
+
+	// No custom update logic needed; physics handles movement via forces and collisions
 }
 
 // --- Game Setup ---
@@ -76,9 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	engine.addGameObject(new Platform(400, 350, 150, 20));
 	engine.addGameObject(new Platform(250, 250, 100, 20));
 	
-	engine.addGameObject(new Box(600, 500)); // A single box on the ground
-	engine.addGameObject(new Box(800, 500)); // Bottom box of a stack
-	engine.addGameObject(new Box(800, 450)); // Top box of a stack
+	engine.addGameObject(new Box(600, 450, 50, 50, 1, 0.95)); // Stacked box (bottom)
+	engine.addGameObject(new Box(600, 400, 50, 50, 1, 0.95)); // Stacked box (top)
 
 	// Set camera to follow the player
 	engine.camera.follow(player);
