@@ -50,15 +50,15 @@ export default class Camera {
 		this.position.x = newX;
 		this.position.y = newY;
 
-		// Clamp camera to world bounds
-		this.position.x = Math.max(
-			0,
-			Math.min(this.position.x, this.worldSize.width - this.viewportSize.width / this.zoom)
-		);
-		this.position.y = Math.max(
-			0,
-			Math.min(this.position.y, this.worldSize.height - this.viewportSize.height / this.zoom)
-		);
+		// // Clamp camera to world bounds
+		// this.position.x = Math.max(
+		// 	0,
+		// 	Math.min(this.position.x, this.worldSize.width - this.viewportSize.width / this.zoom)
+		// );
+		// this.position.y = Math.max(
+		// 	0,
+		// 	Math.min(this.position.y, this.worldSize.height - this.viewportSize.height / this.zoom)
+		// );
 	}
 
 	/**

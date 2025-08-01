@@ -15,32 +15,33 @@ export default class Physics {
 
 	/**
 	 * Updates the physics state for all game objects.
-	 * @param {Array<GameObject>} objects - The list of all game objects.
-	 * @param {number} deltaTime - The time elapsed since the last frame.
+	 * @param {Array<GameObject>} objects
+	 * @param {number}            dt  Time since last frame (s)
 	 */
-	update(objects, deltaTime) {
-		if (deltaTime > 0.1) deltaTime = 0.1; // Prevent spiral of death
+	update(objects, dt) {
+		if (dt > 0.1) dt = 0.1;
 
 		for (const obj of objects) {
-			if (!obj.isMovable) continue;
+		if (!obj.isMovable) continue;
 
-			// Apply forces
-			obj.applyForce(this.gravity.scale(obj.mass));
+		/* 1 ─ external forces (gravity, user forces) */
+		obj.applyForce(this.gravity.scale(obj.mass));
 
-			// Update velocity
-			const acceleration = obj.forces.scale(1 / obj.mass);
-			obj.velocity = obj.velocity.add(acceleration.scale(deltaTime));
+		/* 2 ─ integrate acceleration → velocity */
+		const acc       = obj.forces.scale(1 / obj.mass);
+		obj.velocity    = obj.velocity.add(acc.scale(dt));
+		obj.forces      = new Vector2D(0, 0);
 
-			// Reset forces for the next frame
-			obj.forces = new Vector2D(0, 0);
+		/* 3 ─ move & resolve collisions */
+		this.handleCollisions(obj, objects, dt);
 
-			// Handle collisions and update position
-			this.handleCollisions(obj, objects, deltaTime);
+		/* 4 ─ real kinetic friction when grounded */
+		this.applyGroundFriction(obj, dt);
 		}
 
-		// Resolve resting contacts after all movements (for stable stacking)
-		this.resolveRestingContacts(objects, deltaTime);
-	}
+		/* 5 ─ stacking stabiliser (pop tiny penetrations) */
+		this.resolveRestingContacts(objects);
+  }
 
 	/**
 	 * Handles collision response between two movable objects (pushing).
@@ -372,5 +373,34 @@ export default class Physics {
 			normal.y = vel.y > 0 ? -1 : 1;
 		}
 		return { hit: true, time: entryTime, normal: normal };
+	}
+
+	/**
+	 * Applies kinetic friction to a grounded object.
+	 * Works exactly like a real force: F = μ · N,  N = m · g
+	 * @param {GameObject} obj   - The object to slow down
+	 * @param {number}      dt   - Delta-time of the frame
+	 */
+	applyGroundFriction(obj, dt) {
+		if (!obj.isGrounded) return;
+
+		// Normal reaction on flat ground
+		const normalForce = obj.mass * this.gravity.y; // == m·g  (gravity.y is +-down)
+		const maxFriction = obj.friction * normalForce; // μ·N  (scalar, always ≥0)
+
+		if (obj.velocity.x === 0) return; // nothing to do
+
+		// Direction opposite to motion
+		const sign = Math.sign(obj.velocity.x);
+		const frictionForce = -sign * maxFriction;            // Newtons
+		const accel         = frictionForce / obj.mass;       // a = F/m  (-/+)
+		const dv            = accel * dt;                     // Δv this frame (signed)
+
+		// Do not flip the sign – clamp at zero
+		if (Math.abs(dv) > Math.abs(obj.velocity.x)) {
+			obj.velocity.x = 0;
+		} else {
+			obj.velocity.x += dv;
+		}
 	}
 }

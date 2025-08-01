@@ -70,6 +70,8 @@ class Box extends GameObject {
 
 document.addEventListener("DOMContentLoaded", () => {
 	const canvas = document.getElementById("gameCanvas");
+	let ctx = canvas.getContext("2d");
+	ctx.imageSmoothingEnabled = false;
 	const WORLD_WIDTH = 2000;
 	const WORLD_HEIGHT = 600;
 
