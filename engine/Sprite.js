@@ -7,14 +7,17 @@ export default class Sprite {
 	 * @param {number} frameWidth - The width of a single frame.
 	 * @param {number} frameHeight - The height of a single frame.
 	 * @param {Object} animations - An object defining animations.
-	 *   Example: { run: { frames: [0, 1, 2, 3], speed: 100 }, idle: ... }
+	 * Example: { run: { frames: [0, 1, 2, 3], speed: 100 }, idle: ... }
+	 * @param {number}  [scale = 1]   draw-scale (2 = double size, 4 = 4× …)
 	 */
-	constructor(src, frameWidth, frameHeight, animations = {}) {
+	constructor(src, frameWidth, frameHeight, animations = {}, scale = 1) {
 		this.image = new Image();
 		this.image.src = src;
 		this.frameWidth = frameWidth;
 		this.frameHeight = frameHeight;
 		this.animations = animations;
+		this.scale = scale;
+
 		this.currentAnimation = null;
 		this.currentFrameIndex = 0;
 		this.frameTimer = 0;
@@ -77,8 +80,8 @@ export default class Sprite {
 			this.frameHeight,
 			x,
 			y,
-			this.frameWidth,
-			this.frameHeight
+			this.frameWidth * this.scale,
+			this.frameHeight * this.scale
 		);
 	}
 

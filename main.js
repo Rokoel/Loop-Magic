@@ -1,11 +1,12 @@
 import GameEngine from "./engine/GameEngine.js";
 import GameObject from "./engine/GameObject.js";
+import MultiSprite from "./engine/MultiSprite.js";
 
 // --- Custom Game Object Classes ---
 
 class Player extends GameObject {
 	constructor(x, y) {
-		super(x, y, 40, 60, "cyan");
+		super(x, y, 16*4, 32*4, "cyan");
 		this.id = "player"; // Unique ID for time travel
 		this.isMovable = true;
 		this.mass = 1;
@@ -13,25 +14,92 @@ class Player extends GameObject {
 		this.jumpForce = 700;
 		this.moveSpeed = 300;
 		this.isGrounded = false;
+
+		const sheet = new MultiSprite({
+		idle : { src: "assets/player_idle.png",
+				w: 16, h: 32, frames:[0, 1], speed: 1000 },
+		run  : { src: "assets/player_run.png",
+				w: 16, h: 32, frames:[0, 1], speed: 200 },
+		jump : { src: "assets/player_jump.png",
+				w: 16, h: 32, frames:[2], speed: 1000 }
+		}, 4);
+
+		sheet.setAnimation("idle");
+		this.attachSprite(sheet);
 	}
 
 	update(deltaTime, gameObjects, input) {
 		// Horizontal movement
 		let moveDirection = 0;
+		let isIdle = true;
 		if (input.isKeyDown("a") || input.isKeyDown("arrowleft")) {
 			moveDirection = -1;
+			this.sprite.setAnimation("run");
+			isIdle = false;
 		} else if (input.isKeyDown("d") || input.isKeyDown("arrowright")) {
 			moveDirection = 1;
+			this.sprite.setAnimation("run");
+			isIdle = false;
 		}
 
 		this.velocity.x = moveDirection * this.moveSpeed;
 
-		// Jumping - removed the isGrounded = false line since physics handles it
 		if ((input.isKeyDown("w") || input.isKeyDown("arrowup")) && this.isGrounded) {
 			this.velocity.y = -this.jumpForce;
+			this.sprite.setAnimation("jump");
+			isIdle = false;
 		}
+		if (isIdle && this.isGrounded) {
+			this.sprite.setAnimation("idle");
+		}
+		if (this.sprite) this.sprite.update(deltaTime);
+	}
+
+	draw(ctx, camera) {
+		const facingLeft = this.velocity.x < 0;
+		this.sprite.draw(ctx, this.position.x, this.position.y, facingLeft);
 	}
 }
+
+/**
+ * constructor(x, y) {
+		super(x, y, 16*4, 32*4);
+		this.isMovable = true;
+		this.mass = 1;
+		this.friction = 0.9;
+		this.jumpForce = 700;
+		this.moveSpeed = 300;
+
+		const sheet = new MultiSprite({
+		idle : { src: "assets/player_idle.png",
+				w: 16, h: 24, frames:[0, 1], speed: 200 },
+		run  : { src: "assets/player_run.png",
+				w: 16, h: 24, frames:[0, 1], speed: 90 },
+		jump : { src: "assets/player_jump.png",
+				w: 16, h: 24, frames:[0, 1, 2], speed: 100 }
+		}, 4);
+
+		sheet.setAnimation("idle");
+		this.attachSprite(sheet);
+	}
+
+	update(dt, objs, input) {
+		if (!this.isGrounded)              this.sprite.setAnimation("jump");
+		else if (input.isKeyDown("a") ||
+				input.isKeyDown("d") ||
+				input.isKeyDown("arrowleft") ||
+				input.isKeyDown("arrowright")) this.sprite.setAnimation("run");
+		else                                this.sprite.setAnimation("idle");
+
+		this.sprite.update(dt);
+
+	}
+
+	draw(ctx, camera) {
+		const facingLeft = this.velocity.x < 0;
+		this.sprite.draw(ctx, this.position.x, this.position.y, facingLeft);
+	}
+*/
 
 class Platform extends GameObject {
 	constructor(x, y, width, height, isOneWay = false) {
@@ -70,8 +138,6 @@ class Box extends GameObject {
 
 document.addEventListener("DOMContentLoaded", () => {
 	const canvas = document.getElementById("gameCanvas");
-	let ctx = canvas.getContext("2d");
-	ctx.imageSmoothingEnabled = false;
 	const WORLD_WIDTH = 2000;
 	const WORLD_HEIGHT = 600;
 

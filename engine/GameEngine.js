@@ -16,9 +16,24 @@ export default class GameEngine {
 	 */
 	constructor(canvas, worldWidth, worldHeight) {
 		this.canvas = canvas;
+
+		/* ── device-pixel-ratio aware canvas ───────────────── */
+		const DPR = window.devicePixelRatio || 1;
+		const CSS_WIDTH  = 800;          // the size you *want* on screen
+		const CSS_HEIGHT = 600;
+
+		canvas.style.width  = CSS_WIDTH  + "px";      // no further CSS scaling
+		canvas.style.height = CSS_HEIGHT + "px";
+		canvas.width        = CSS_WIDTH  * DPR;       // real backing store
+		canvas.height       = CSS_HEIGHT * DPR;
+
 		this.ctx = canvas.getContext("2d");
-		this.canvas.width = 800;
-		this.canvas.height = 600;
+		this.ctx.scale(DPR, DPR);                     // make 1 unit = 1 CSS pixel
+
+		/* ── very important: nearest-neighbour everywhere ─── */
+		this.ctx.imageSmoothingEnabled       = false;
+		this.ctx.webkitImageSmoothingEnabled = false; // Safari
+		this.ctx.msImageSmoothingEnabled     = false; // old Edge
 
 		this.gameObjects = [];
 		this.lastTime = 0;
