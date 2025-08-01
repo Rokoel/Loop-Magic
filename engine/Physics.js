@@ -90,7 +90,7 @@ export default class Physics {
 	handleCollisions(obj, allObjects, deltaTime) {
 		obj.isGrounded = false;
 		let remainingTime = 1;
-		let maxIterations = 5; // Increased for better stack resolution
+		let maxIterations = 10; // Increased for better stack resolution
 
 		// First, handle any existing overlaps by separating objects
 		this.separateOverlappingObjects(obj, allObjects);

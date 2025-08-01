@@ -1,6 +1,7 @@
 import GameEngine from "./engine/GameEngine.js";
 import GameObject from "./engine/GameObject.js";
 import MultiSprite from "./engine/MultiSprite.js";
+import Sprite from "./engine/Sprite.js";
 
 // --- Custom Game Object Classes ---
 
@@ -20,6 +21,8 @@ class Player extends GameObject {
 				w: 16, h: 32, frames:[0, 1], speed: 1000 },
 		run  : { src: "assets/player_run.png",
 				w: 16, h: 32, frames:[0, 1], speed: 200 },
+		crouch : { src: "assets/player_jump.png",
+				w: 16, h: 32, frames:[1], speed: 1000 },
 		jump : { src: "assets/player_jump.png",
 				w: 16, h: 32, frames:[2], speed: 1000 }
 		}, 4);
@@ -42,6 +45,17 @@ class Player extends GameObject {
 			isIdle = false;
 		}
 
+		if (input.isKeyDown("s") || input.isKeyDown("arrowdown")) {
+			this.sprite.setAnimation("crouch");
+			this.size = {width: 16*4, height: 32*4}; // Crouch size
+			
+			isIdle = false;
+		}
+		else {
+			this.size = {width: 16*4, height: 32*4}; // Normal size
+			if (isIdle) this.sprite.setAnimation("idle");
+		}
+
 		this.velocity.x = moveDirection * this.moveSpeed;
 
 		if ((input.isKeyDown("w") || input.isKeyDown("arrowup")) && this.isGrounded) {
@@ -60,46 +74,6 @@ class Player extends GameObject {
 		this.sprite.draw(ctx, this.position.x, this.position.y, facingLeft);
 	}
 }
-
-/**
- * constructor(x, y) {
-		super(x, y, 16*4, 32*4);
-		this.isMovable = true;
-		this.mass = 1;
-		this.friction = 0.9;
-		this.jumpForce = 700;
-		this.moveSpeed = 300;
-
-		const sheet = new MultiSprite({
-		idle : { src: "assets/player_idle.png",
-				w: 16, h: 24, frames:[0, 1], speed: 200 },
-		run  : { src: "assets/player_run.png",
-				w: 16, h: 24, frames:[0, 1], speed: 90 },
-		jump : { src: "assets/player_jump.png",
-				w: 16, h: 24, frames:[0, 1, 2], speed: 100 }
-		}, 4);
-
-		sheet.setAnimation("idle");
-		this.attachSprite(sheet);
-	}
-
-	update(dt, objs, input) {
-		if (!this.isGrounded)              this.sprite.setAnimation("jump");
-		else if (input.isKeyDown("a") ||
-				input.isKeyDown("d") ||
-				input.isKeyDown("arrowleft") ||
-				input.isKeyDown("arrowright")) this.sprite.setAnimation("run");
-		else                                this.sprite.setAnimation("idle");
-
-		this.sprite.update(dt);
-
-	}
-
-	draw(ctx, camera) {
-		const facingLeft = this.velocity.x < 0;
-		this.sprite.draw(ctx, this.position.x, this.position.y, facingLeft);
-	}
-*/
 
 class Platform extends GameObject {
 	constructor(x, y, width, height, isOneWay = false) {
@@ -129,6 +103,15 @@ class Box extends GameObject {
 		this.isMovable = true;
 		this.mass = mass;
 		this.friction = friction;
+
+		this.sprite = new Sprite("assets/box.png", 16, 16, {
+			idle: { frames: [0], speed: 1000 }
+		}, 4);
+		this.sprite.setAnimation("idle");
+	}
+
+	update(deltaTime, gameObjects, input) {
+		if (this.sprite) this.sprite.update(deltaTime);
 	}
 
 	// No custom update logic needed; physics handles movement via forces and collisions
@@ -149,13 +132,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Create level platforms
 	engine.addGameObject(new Platform(0, 550, WORLD_WIDTH, 50)); // Ground
-	engine.addGameObject(new Platform(200, 450, 150, 20));
-	engine.addGameObject(new Platform(400, 350, 150, 20));
-	engine.addGameObject(new Platform(250, 250, 100, 20));
+	// engine.addGameObject(new Platform(200, 450, 150, 20));
+	// engine.addGameObject(new Platform(400, 350, 150, 20));
+	// engine.addGameObject(new Platform(250, 250, 100, 20));
 	
-	engine.addGameObject(new Box(600, 450, 50, 50, 0.1, 0.95)); // Stacked box (bottom)
-	engine.addGameObject(new Box(600, 400, 50, 50, 0.1, 0.95)); // Stacked box (top)
-	engine.addGameObject(new Box(600, 350, 50, 50, 0.1, 0.95)); // Stacked box (top)
+	engine.addGameObject(new Box(600, 450, 16*4, 16*4, 0.1, 0.95)); // Stacked box (bottom)
+	engine.addGameObject(new Box(600, 400, 16*4, 16*4, 0.1, 0.95)); // Stacked box (top)
+	engine.addGameObject(new Box(600, 350, 16*4, 16*4, 0.1, 0.95)); // Stacked box (top)
 
 	// Set camera to follow the player
 	engine.camera.follow(player);

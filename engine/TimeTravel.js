@@ -2,9 +2,9 @@
  * Manages the recording and rewinding of game state for the time travel mechanic.
  */
 export default class TimeTravel {
-	constructor() {
+	constructor(maxHistory = 300) {
 		this.history = [];
-		this.maxHistory = 300; // Store ~5 seconds of history at 60fps
+		this.maxHistory = maxHistory; // Store ~5 seconds of history at 60fps
 	}
 
 	/**

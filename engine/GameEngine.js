@@ -42,7 +42,7 @@ export default class GameEngine {
 		this.input = new InputHandler();
 		this.physics = new Physics(worldWidth, worldHeight);
 		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width, this.canvas.height);
-		this.timeTravel = new TimeTravel();
+		this.timeTravel = new TimeTravel(60 * 10);
 		this.particleSystem = new ParticleSystem();
 	}
 
