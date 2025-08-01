@@ -17,20 +17,18 @@ export default class GameEngine {
 	constructor(canvas, worldWidth, worldHeight) {
 		this.canvas = canvas;
 
-		/* ── device-pixel-ratio aware canvas ───────────────── */
 		const DPR = window.devicePixelRatio || 1;
-		const CSS_WIDTH  = 800;          // the size you *want* on screen
+		const CSS_WIDTH  = 800;
 		const CSS_HEIGHT = 600;
 
-		canvas.style.width  = CSS_WIDTH  + "px";      // no further CSS scaling
+		canvas.style.width  = CSS_WIDTH  + "px";
 		canvas.style.height = CSS_HEIGHT + "px";
-		canvas.width        = CSS_WIDTH  * DPR;       // real backing store
+		canvas.width        = CSS_WIDTH  * DPR;
 		canvas.height       = CSS_HEIGHT * DPR;
 
 		this.ctx = canvas.getContext("2d");
 		this.ctx.scale(DPR, DPR);                     // make 1 unit = 1 CSS pixel
 
-		/* ── very important: nearest-neighbour everywhere ─── */
 		this.ctx.imageSmoothingEnabled       = false;
 		this.ctx.webkitImageSmoothingEnabled = false; // Safari
 		this.ctx.msImageSmoothingEnabled     = false; // old Edge
@@ -38,7 +36,6 @@ export default class GameEngine {
 		this.gameObjects = [];
 		this.lastTime = 0;
 
-		// Initialize engine subsystems
 		this.input = new InputHandler();
 		this.physics = new Physics(worldWidth, worldHeight);
 		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width, this.canvas.height);
@@ -67,7 +64,7 @@ export default class GameEngine {
 	 * @param {number} timestamp - The current time provided by requestAnimationFrame.
 	 */
 	gameLoop(timestamp = 0) {
-		const deltaTime = (timestamp - this.lastTime) / 1000; // Time in seconds
+		const deltaTime = (timestamp - this.lastTime) / 1000;
 		this.lastTime = timestamp;
 
 		this.update(deltaTime);
@@ -103,21 +100,14 @@ export default class GameEngine {
 	 * Renders the game world to the canvas.
 	 */
 	draw() {
-		// Clear the canvas
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-		// Apply camera transformations
 		this.camera.applyTransform(this.ctx);
-
-		// Draw all game objects
 		for (const obj of this.gameObjects) {
 			obj.draw(this.ctx, this.camera);
 		}
-
-		// Draw particles
 		this.particleSystem.draw(this.ctx);
 
-		// Revert camera transformations to draw UI if needed
 		this.camera.revertTransform(this.ctx);
+		// TODO: UI
 	}
 }

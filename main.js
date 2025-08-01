@@ -94,10 +94,10 @@ class Box extends GameObject {
 	 * @param {number} width - The width of the box.
 	 * @param {number} height - The height of the box.
 	 * @param {number} [mass=2] - The mass of the box (higher mass makes it harder to push).
-	 * @param {number} [friction=0.8] - The friction coefficient (higher for better stacking stability).
+	 * @param {number} [friction=0.1] - The friction coefficient (higher for better stacking stability).
 	 * @param {string} [color='#8B4513'] - The color of the box for debugging.
 	 */
-	constructor(x, y, width, height, mass = 2, friction = 0.8, color = "#8B4513") {
+	constructor(x, y, width, height, mass = 2, friction = 0.1, color = "#8B4513") {
 		super(x, y, width, height, color);
 		this.id = `box_${Math.random().toString(36).substr(2, 9)}`; // Unique ID for time travel
 		this.isMovable = true;

@@ -11,8 +11,9 @@ export default class GameObject {
 	 * @param {number} width - The width of the object.
 	 * @param {number} height - The height of the object.
 	 * @param {string} [color='red'] - The color of the object for debugging.
+	 * @param {number} [friction=0.2] - The friction coefficient (higher for better stacking stability).
 	 */
-	constructor(x, y, width, height, color = "red") {
+	constructor(x, y, width, height, color = "red", friction = 0.2) {
 		this.position = new Vector2D(x, y);
 		this.velocity = new Vector2D(0, 0);
 		this.size = { width, height };
@@ -21,7 +22,7 @@ export default class GameObject {
 		// Physics properties
 		this.isMovable = false;
 		this.mass = 10;
-		this.friction = 0.9; // Coefficient of friction
+		this.friction = friction;
 		this.forces = new Vector2D(0, 0);
 
 		// Collision properties

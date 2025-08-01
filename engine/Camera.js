@@ -9,14 +9,20 @@ export default class Camera {
 	 * @param {number} worldHeight - The total height of the game world.
 	 * @param {number} canvasWidth - The width of the canvas element.
 	 * @param {number} canvasHeight - The height of the canvas element.
+	 * @param {number} [smoothness = 0.05] - The smoothness factor for camera movement.
+	 *                                    A value between 0 and 1, where 0 is instant and
+	 *                                    1 is very smooth but slow.
+	 * @param {boolean} [shouldClamp = false] - Whether to clamp the camera position within world bounds.
+	 *                                          If true, the camera will not show areas outside the world.
 	 */
-	constructor(worldWidth, worldHeight, canvasWidth, canvasHeight) {
+	constructor(worldWidth, worldHeight, canvasWidth, canvasHeight, smoothness = 0.05, shouldClamp = false) {
 		this.position = new Vector2D(0, 0);
 		this.worldSize = { width: worldWidth, height: worldHeight };
 		this.viewportSize = { width: canvasWidth, height: canvasHeight };
 		this.target = null; // The GameObject to follow
 		this.zoom = 1.0;
-		this.smoothness = 0.05; // Value between 0 and 1 for camera follow speed
+		this.smoothness = smoothness;
+		this.shouldClamp = shouldClamp;
 	}
 
 	/**
@@ -50,15 +56,17 @@ export default class Camera {
 		this.position.x = newX;
 		this.position.y = newY;
 
-		// // Clamp camera to world bounds
-		// this.position.x = Math.max(
-		// 	0,
-		// 	Math.min(this.position.x, this.worldSize.width - this.viewportSize.width / this.zoom)
-		// );
-		// this.position.y = Math.max(
-		// 	0,
-		// 	Math.min(this.position.y, this.worldSize.height - this.viewportSize.height / this.zoom)
-		// );
+		if (this.shouldClamp) {
+			// Clamp camera to world bounds
+			this.position.x = Math.max(
+				0,
+				Math.min(this.position.x, this.worldSize.width - this.viewportSize.width / this.zoom)
+			);
+			this.position.y = Math.max(
+				0,
+				Math.min(this.position.y, this.worldSize.height - this.viewportSize.height / this.zoom)
+			);
+		}
 	}
 
 	/**
