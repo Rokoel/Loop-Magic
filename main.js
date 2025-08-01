@@ -21,8 +21,6 @@ class Player extends GameObject {
 				w: 16, h: 32, frames:[0, 1], speed: 1000 },
 		run  : { src: "assets/player_run.png",
 				w: 16, h: 32, frames:[0, 1], speed: 200 },
-		crouch : { src: "assets/player_jump.png",
-				w: 16, h: 32, frames:[1], speed: 1000 },
 		jump : { src: "assets/player_jump.png",
 				w: 16, h: 32, frames:[2], speed: 1000 }
 		}, 4);
@@ -45,22 +43,12 @@ class Player extends GameObject {
 			isIdle = false;
 		}
 
-		if (input.isKeyDown("s") || input.isKeyDown("arrowdown")) {
-			this.sprite.setAnimation("crouch");
-			this.size = {width: 16*4, height: 32*4}; // Crouch size
-			
-			isIdle = false;
-		}
-		else {
-			this.size = {width: 16*4, height: 32*4}; // Normal size
-			if (isIdle) this.sprite.setAnimation("idle");
-		}
-
 		this.velocity.x = moveDirection * this.moveSpeed;
 
 		if ((input.isKeyDown("w") || input.isKeyDown("arrowup")) && this.isGrounded) {
 			this.velocity.y = -this.jumpForce;
 			this.sprite.setAnimation("jump");
+			this.isGrounded = false;
 			isIdle = false;
 		}
 		if (isIdle && this.isGrounded) {
