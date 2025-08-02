@@ -1,3 +1,6 @@
+import { LIGHT_ROCK_TEXTURES } from "../engine/textureLoader.js";
+import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
+
 /* editor/LevelEditor.js
  * Mouse-driven GUI to place / move / resize objects.
  * Physics is never stepped – we only call engine.draw().
@@ -180,12 +183,18 @@ export default class LevelEditor {
     /* Load */
     const loadInput = bar.querySelector("#loadInput");
     bar.querySelector("#loadBtn").addEventListener("click", () => loadInput.click());
-    loadInput.addEventListener("change", e => {
+    loadInput.addEventListener("change", async e => {
       const file = e.target.files[0];
       if (!file) return;
-      file.text().then(txt => {
-        importLevel(JSON.parse(txt), this.engine, this.classes);
-      });
+
+      const json = JSON.parse(await file.text());
+
+      /*  wait for the bitmaps  */
+      const player = importLevel(json, this.engine, this.classes);
+
+      /* (optional) in the editor we usually keep the camera static;
+        remove this line if you prefer.                          */
+      if (player) this.engine.camera.follow(player);
     });
   }
 }

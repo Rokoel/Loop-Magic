@@ -18,6 +18,7 @@ export function exportLevel(objects) {
     else                   // Platform
       out.platforms.push({ ...base, oneWay: !!o.isOneWay });
   }
+  out.backgrounds = engine.backgrounds.map(b => b.toJSON());
   return JSON.stringify(out, null, 2);
 }
 
@@ -29,12 +30,12 @@ export function importLevel(data, engine, classes) {
     var player = new Player(data.player.x, data.player.y);
     if (data.player) engine.addGameObject(player);
 
-    for (const p of data.platforms)
+    for (const p of data.platforms ?? [])
         engine.addGameObject(
         new Platform(p.x, p.y, p.w, p.h, p.oneWay)
     );
 
-    for (const b of data.boxes)
+    for (const b of data.boxes ?? [])
         engine.addGameObject(
         new Box(b.x, b.y, b.w, b.h, b.mass, b.friction)
     );

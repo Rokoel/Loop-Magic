@@ -36,6 +36,8 @@ export default class GameEngine {
 		this.gameObjects = [];
 		this.lastTime = 0;
 
+		this.backgrounds = [];
+
 		this.input = new InputHandler();
 		this.physics = new Physics(worldWidth, worldHeight);
 		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width, this.canvas.height);
@@ -55,23 +57,33 @@ export default class GameEngine {
 	 * Starts the main game loop.
 	 */
 	start() {
-		this.lastTime = performance.now();
-		this.gameLoop();
-	}
+		this.lastTime     = performance.now();
+		this.accumulator  = 0;            // time left to simulate (s)
+		this.fixedStep    = 1 / 120;      // 120 Hz micro-step  (≈0.0083 s)
+		requestAnimationFrame(this.loop.bind(this));
+		}
 
-	/**
-	 * The main game loop, called once per frame.
-	 * @param {number} timestamp - The current time provided by requestAnimationFrame.
-	 */
-	gameLoop(timestamp = 0) {
-		const deltaTime = (timestamp - this.lastTime) / 1000;
-		this.lastTime = timestamp;
+		loop(now = 0) {
+		/* accumulate real time -------------------------------------- */
+		let frameTime = (now - this.lastTime) / 1000;
+		this.lastTime = now;
 
-		this.update(deltaTime);
+		/* avoid spiral of death on tab-switch */
+		const MAX_FRAME = 0.25;           // 250 ms
+		if (frameTime > MAX_FRAME) frameTime = MAX_FRAME;
+
+		this.accumulator += frameTime;
+
+		/* run micro-steps ------------------------------------------- */
+		while (this.accumulator >= this.fixedStep) {
+			this.update(this.fixedStep);    //  ← your old update(dt)
+			this.accumulator -= this.fixedStep;
+		}
+
+		/* one draw per raf ------------------------------------------ */
 		this.draw();
-
-		requestAnimationFrame(this.gameLoop.bind(this));
-	}
+		requestAnimationFrame(this.loop.bind(this));
+		}
 
 	/**
 	 * Updates the state of the game world.
@@ -102,6 +114,9 @@ export default class GameEngine {
 	draw() {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.camera.applyTransform(this.ctx);
+
+		for (const bg of this.backgrounds) bg.draw(this.ctx);
+
 		for (const obj of this.gameObjects) {
 			obj.draw(this.ctx, this.camera);
 		}
@@ -110,4 +125,14 @@ export default class GameEngine {
 		this.camera.revertTransform(this.ctx);
 		// TODO: UI
 	}
+	/**
+	 * Adds a background to the game engine.
+	 * @param {BackgroundRect} bg - The background to add.
+	 */
+	addBackground(bg)  { this.backgrounds.push(bg); }
+
+	/**
+	 * Clears all backgrounds from the game engine.
+	 */
+	clearBackgrounds() { this.backgrounds.length = 0; }
 }
