@@ -25,6 +25,7 @@ export default class GameEngine {
 		canvas.style.height = CSS_HEIGHT + "px";
 		canvas.width        = CSS_WIDTH  * DPR;
 		canvas.height       = CSS_HEIGHT * DPR;
+		this.paused = false;
 
 		this.ctx = canvas.getContext("2d");
 		this.ctx.scale(DPR, DPR);                     // make 1 unit = 1 CSS pixel
@@ -45,6 +46,9 @@ export default class GameEngine {
 		this.particleSystem = new ParticleSystem();
 	}
 
+	pause()  { this.paused = true;  }
+  	resume() { this.paused = false; }
+
 	/**
 	 * Adds a game object to the engine's management.
 	 * @param {GameObject} obj - The game object to add.
@@ -61,9 +65,14 @@ export default class GameEngine {
 		this.accumulator  = 0;            // time left to simulate (s)
 		this.fixedStep    = 1 / 120;      // 120 Hz micro-step  (≈0.0083 s)
 		requestAnimationFrame(this.loop.bind(this));
-		}
+	}
 
-		loop(now = 0) {
+	/**
+	 * The main game loop that runs at a fixed time step.
+	 * It accumulates real time and updates the game state accordingly.
+	 * @param {number} now - The current time in milliseconds.
+	 */
+	loop(now = 0) {
 		/* accumulate real time -------------------------------------- */
 		let frameTime = (now - this.lastTime) / 1000;
 		this.lastTime = now;
@@ -83,7 +92,7 @@ export default class GameEngine {
 		/* one draw per raf ------------------------------------------ */
 		this.draw();
 		requestAnimationFrame(this.loop.bind(this));
-		}
+	}
 
 	/**
 	 * Updates the state of the game world.
