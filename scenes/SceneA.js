@@ -11,7 +11,7 @@ export const SceneA = {
     const player = new Player(50, 50);
     engine.addGameObject(player);
 
-    const platform = new Platform(-200, 200, 1000, 500, false,
+    const platform = new Platform(100, 200, 1000, 500, false,
                                   RED_PLATFORM_TEXTURES);
     engine.addGameObject(platform);
 
@@ -27,6 +27,11 @@ export const SceneA = {
             );
 
     engine.camera.follow(player);
+    window.addEventListener("show:menu", () => menu.show());
+    window.addEventListener("scene:restart", () => {
+        // Your scene restart logic here
+        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene1" }));
+    });
   },
 
   /**
@@ -59,6 +64,13 @@ export const SceneA = {
           0.3, 0.5, Math.PI/2
         );
       }
+    }
+
+    if (engine.input.isKeyDown("U")) {
+      engine.input.setEnabled(false);
+      engine.textBox.show("This is a story message!", () => {
+          engine.input.setEnabled(true);
+      });
     }
 
     if (engine.input.isKeyDown("E")) {

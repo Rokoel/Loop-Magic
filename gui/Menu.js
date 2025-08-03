@@ -42,6 +42,16 @@ export default class Menu {
         };
         menu.appendChild(beginBtn);
 
+        // Restart Scene button
+        const restartBtn = document.createElement("button");
+        restartBtn.textContent = "Restart Scene";
+        restartBtn.style.marginTop = "1em";
+        restartBtn.onclick = () => {
+            this.hide();
+            window.dispatchEvent(new CustomEvent("scene:restart"));
+        };
+        menu.appendChild(restartBtn);
+
         // Music toggle button
         this.musicBtn = document.createElement("button");
         this.musicBtn.textContent = this.musicOn ? "Music: On" : "Music: Off";

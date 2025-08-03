@@ -6,6 +6,7 @@ import TimeController from "./TimeController.js";
 import ParticleSystem from "./ParticleSystem.js";
 import { Player } from "./entities.js";
 import { drawVignetteOverlay } from "../gui/Vignette.js";
+import TextBox from "../gui/TextBox.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -48,6 +49,7 @@ export default class GameEngine {
 		this.timeTravel = new TimeTravel(60 * 10);
 		this.timeCtrl = new TimeController();
 		this.particleSystem = new ParticleSystem();
+		this.textBox = new TextBox(canvas);
 	}
 
 	pause()  { this.paused = true;  }
@@ -144,6 +146,7 @@ export default class GameEngine {
 			this.timeTravel.record(this.gameObjects, this.particleSystem);
 		}
 
+		this.textBox.update(deltaTime);
 
 		this.camera.update();
 	}
@@ -168,6 +171,7 @@ export default class GameEngine {
 		if (this.showVignette) {
 			drawVignetteOverlay(this.ctx, this.canvas.width, this.canvas.height);
 		}
+		if (this.textBox && this.textBox.active) this.textBox._draw();
 		// TODO: UI
 	}
 	/**
