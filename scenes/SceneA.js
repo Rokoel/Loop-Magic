@@ -1,6 +1,7 @@
 import { Player, Platform, Box } from "../engine/entities.js";
 import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES } from "../engine/textureLoader.js";
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
+import { applyForce } from "../engine/ForceUtils.js";
 
 export const SceneA = {
   /* runs ONCE when scene becomes active */
@@ -28,8 +29,11 @@ export const SceneA = {
 
   /* runs EVERY frame while scene is current */
   tick(dt, engine) {
-    const inp = engine.input;
-    engine.timeCtrl.slowOnly([engine.gameObjects[2]], 0.1);
+    // const inp = engine.input;
+    applyForce(engine.getPlayerInstance(), 1, 0); // This is not a proper fix, but I don't have time to deal with this bs
+    engine.timeCtrl.slowOnly(engine.gameObjects.filter(
+      obj => obj instanceof Box
+    ), 0.1);
   },
 
   /* optional – tidy up (stop music, etc.) */

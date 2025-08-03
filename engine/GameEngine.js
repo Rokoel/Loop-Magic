@@ -4,7 +4,7 @@ import Camera from "./Camera.js";
 import TimeTravel from "./TimeTravel.js";
 import TimeController from "./TimeController.js";
 import ParticleSystem from "./ParticleSystem.js";
-import { applyForce, applyImpulse } from "./ForceUtils.js";
+import { Player } from "./entities.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -160,4 +160,8 @@ export default class GameEngine {
 	 * Clears all backgrounds from the game engine.
 	 */
 	clearBackgrounds() { this.backgrounds.length = 0; }
+
+	getPlayerInstance() {
+		return this.gameObjects.filter(obj => obj instanceof Player)[0] || null;
+	}
 }

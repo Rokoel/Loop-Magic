@@ -96,7 +96,7 @@ export default class Physics {
 		let maxIterations = 10; // Increased for better stack resolution
 
 		// First, handle any existing overlaps by separating objects
-		this.separateOverlappingObjects(obj, allObjects);
+		this.separateOverlappingObjects(obj, allObjects, deltaTime);
 
 		while (remainingTime > 0 && maxIterations-- > 0) {
 			let earliestCollision = {
@@ -206,7 +206,7 @@ export default class Physics {
 	 * @param {GameObject} obj - The object to separate.
 	 * @param {Array<GameObject>} allObjects - All objects in the scene.
 	 */
-	separateOverlappingObjects(obj, allObjects) {
+	separateOverlappingObjects(obj, allObjects, deltaTime) {
 		for (const other of allObjects) {
 			if (obj === other || !obj.isMovable) continue;
 
@@ -248,11 +248,11 @@ export default class Physics {
 					const separationDistance = overlapY;
 					
 					if (centerY1 < centerY2) {
-						obj.position.y -= separationDistance;
+						obj.position.y -= separationDistance * deltaTime;
 						if (obj.velocity.y > 0) obj.velocity.y = 0;
 						obj.isGrounded = true;
 					} else {
-						obj.position.y += separationDistance;
+						obj.position.y += separationDistance * deltaTime;
 						if (obj.velocity.y < 0) obj.velocity.y = 0;
 					}
 				}
