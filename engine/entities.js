@@ -80,13 +80,13 @@ export class Player extends GameObject {
 }
 
 export class Platform extends GameObject {
-    constructor(x, y, width, height, isOneWay = false) {
+    constructor(x, y, width, height, isOneWay = false, platformTextures = PLATFORM_TEXTURES) {
         super(x, y, width, height, "#4CAF50");
         this.isMovable = false;
         this.isOneWay = isOneWay;
         this._canvas = createRandomTiledCanvas(
             width, height,
-            PLATFORM_TEXTURES,
+            platformTextures,
             32*4,                       // smallest tile size 16 px
             32*4                        // largest tile size 16 px
         );
@@ -126,14 +126,14 @@ export class Box extends GameObject {
      * @param {number} [friction=0.1] - The friction coefficient (higher for better stacking stability).
      * @param {string} [color='#8B4513'] - The color of the box for debugging.
      */
-    constructor(x, y, width, height, mass = 2, friction = 0.1, color = "#8B4513") {
+    constructor(x, y, width, height, mass = 2, friction = 0.1, color = "#8B4513", spriteSrc = "assets/box.png") {
         super(x, y, width, height, color);
         this.id = `box_${Math.random().toString(36).substr(2, 9)}`; // Unique ID for time travel
         this.isMovable = true;
         this.mass = mass;
         this.friction = friction;
 
-        this.sprite = new Sprite("assets/box.png", 16, 16, {
+        this.sprite = new Sprite(spriteSrc, 16, 16, {
             idle: { frames: [0], speed: 1000 }
         }, 8);
         this.sprite.setAnimation("idle");
@@ -142,6 +142,4 @@ export class Box extends GameObject {
     update(deltaTime, gameObjects, input) {
         if (this.sprite) this.sprite.update(deltaTime);
     }
-
-    // No custom update logic needed; physics handles movement via forces and collisions
 }
