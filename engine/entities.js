@@ -3,6 +3,8 @@ import MultiSprite from "./MultiSprite.js";
 import Sprite from "./Sprite.js";
 import { createRandomTiledCanvas } from "./RandomTileCanvas.js";
 import { PLATFORM_TEXTURES }       from "./textureLoader.js";
+import { applyImpulse, applyForce } from "./ForceUtils.js";
+import Vector2D from "./Vector2D.js";
 
 /* --- preload one or many textures once ----------------------- */
 
@@ -13,11 +15,13 @@ export class Player extends GameObject {
         super(x, y, 16*4, 32*4, "cyan");
         this.id = "player"; // Unique ID for time travel
         this.isMovable = true;
-        this.mass = 1;
-        this.friction = 0.9;
+        this.mass = 50;
+        this.friction = 0.5;
         this.jumpForce = 700;
-        this.moveSpeed = 300;
+        this.maxSpeed   = 300;  // px/s   – horizontal top speed
+        this.moveForce  = 500000; // N      – how hard we push each frame
         this.isGrounded = false;
+        this.facingLeft = false;
 
         const sheet = new MultiSprite({
         idle : { src: "assets/player_idle.png",
@@ -40,13 +44,23 @@ export class Player extends GameObject {
             moveDirection = -1;
             this.sprite.setAnimation("run");
             isIdle = false;
+            this.facingLeft = true;
         } else if (input.isKeyDown("d") || input.isKeyDown("arrowright")) {
             moveDirection = 1;
             this.sprite.setAnimation("run");
             isIdle = false;
+            this.facingLeft = false;
         }
 
-        this.velocity.x = moveDirection * this.moveSpeed;
+        if (moveDirection !== 0) {
+            const v  = this.velocity.x;
+            const s  = Math.sign(v);
+
+            /* push only if we haven’t reached maxSpeed in that direction */
+            if (Math.abs(v) < this.maxSpeed || s !== moveDirection) {
+                applyForce(this, moveDirection * this.moveForce, 0);
+            }
+        }
 
         if ((input.isKeyDown("w") || input.isKeyDown("arrowup")) && this.isGrounded) {
             this.velocity.y = -this.jumpForce;
@@ -61,8 +75,7 @@ export class Player extends GameObject {
     }
 
     draw(ctx, camera) {
-        const facingLeft = this.velocity.x < 0;
-        this.sprite.draw(ctx, this.position.x, this.position.y, facingLeft);
+        this.sprite.draw(ctx, this.position.x, this.position.y, this.facingLeft);
     }
 }
 
@@ -74,8 +87,8 @@ export class Platform extends GameObject {
         this._canvas = createRandomTiledCanvas(
             width, height,
             PLATFORM_TEXTURES,
-            16*4,                       // smallest tile size 16 px
-            16*4                        // largest tile size 16 px
+            32*4,                       // smallest tile size 16 px
+            32*4                        // largest tile size 16 px
         );
     }
     draw(ctx /*, camera */) {
@@ -122,7 +135,7 @@ export class Box extends GameObject {
 
         this.sprite = new Sprite("assets/box.png", 16, 16, {
             idle: { frames: [0], speed: 1000 }
-        }, 4);
+        }, 8);
         this.sprite.setAnimation("idle");
     }
 

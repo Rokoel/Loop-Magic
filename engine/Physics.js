@@ -173,11 +173,9 @@ export default class Physics {
 	/**
 	 * Resolves resting contacts for stable stacking (counteracts gravity on stacks).
 	 * @param {Array<GameObject>} allObjects - All objects in the scene.
-	 * @param {number} deltaTime - The frame's delta time.
 	 */
 	resolveRestingContacts(allObjects) {
-		const PEN_TOL = 5;   // positional tolerance (pixels)
-		const H_FRICTION = 0.1; // very light horizontal drag when resting
+		const PEN_TOL = 16;   // positional tolerance (pixels)
 
 		for (const top of allObjects) {
 			if (!top.isMovable) continue;
@@ -199,14 +197,6 @@ export default class Physics {
 				top.position.y -= penetration;      // pop the object up
 				top.velocity.y = 0;                 // kill vertical motion
 				top.isGrounded = true;              // allow jumping
-				if (bottom.isMovable) bottom.isSupport = true; // optional flag you can use elsewhere
-
-				// /* --- minimal horizontal damping so stack does not slide off --- */
-				// if (Math.abs(top.velocity.x) < 5) {
-				// 	// only damp if object is almost idle (so player input is not cancelled)
-				// 	top.velocity.x *= (1 - H_FRICTION);
-				// 	if (Math.abs(top.velocity.x) < 0.5) top.velocity.x = 0;
-				// }
 			}
 		}
 	}

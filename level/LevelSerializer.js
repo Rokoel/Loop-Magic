@@ -18,7 +18,6 @@ export function exportLevel(objects) {
     else                   // Platform
       out.platforms.push({ ...base, oneWay: !!o.isOneWay });
   }
-  out.backgrounds = engine.backgrounds.map(b => b.toJSON());
   return JSON.stringify(out, null, 2);
 }
 

@@ -4,6 +4,7 @@ import Camera from "./Camera.js";
 import TimeTravel from "./TimeTravel.js";
 import TimeController from "./TimeController.js";
 import ParticleSystem from "./ParticleSystem.js";
+import { applyForce, applyImpulse } from "./ForceUtils.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -119,6 +120,7 @@ export default class GameEngine {
 		}
 
 		if (this.input.isMiddleDown()) {
+			applyForce(this.gameObjects[0], -500, 5);
 			// this.timeCtrl.slowGlobal(0.25);
 			// this.timeCtrl.slowExcept([this.gameObjects[0]], 2, 0.3);
 		}

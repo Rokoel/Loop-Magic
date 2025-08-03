@@ -19,7 +19,7 @@ export async function startGame() {
 							LIGHT_ROCK_TEXTURES,
 							16*4, 32*4)
 		);
-	const data = await fetch("assets/level2.json").then(r => r.json());
+	const data = await fetch("assets/level.json").then(r => r.json());
 	const player = await importLevel(data, engine, { Player, Platform, Box });
 	if (player) {
 		engine.camera.follow(player);
