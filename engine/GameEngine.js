@@ -2,6 +2,7 @@ import Physics from "./Physics.js";
 import InputHandler from "./InputHandler.js";
 import Camera from "./Camera.js";
 import TimeTravel from "./TimeTravel.js";
+import TimeController from "./TimeController.js";
 import ParticleSystem from "./ParticleSystem.js";
 
 /**
@@ -39,10 +40,11 @@ export default class GameEngine {
 
 		this.backgrounds = [];
 
-		this.input = new InputHandler();
+		this.input = new InputHandler(this.canvas);
 		this.physics = new Physics(worldWidth, worldHeight);
 		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width, this.canvas.height);
 		this.timeTravel = new TimeTravel(60 * 10);
+		this.timeCtrl = new TimeController();
 		this.particleSystem = new ParticleSystem();
 	}
 
@@ -83,9 +85,10 @@ export default class GameEngine {
 
 		this.accumulator += frameTime;
 
+		this.timeCtrl.update(frameTime);
 		/* run micro-steps ------------------------------------------- */
 		while (this.accumulator >= this.fixedStep) {
-			this.update(this.fixedStep);    //  ← your old update(dt)
+			this.update(this.fixedStep);
 			this.accumulator -= this.fixedStep;
 		}
 
@@ -105,13 +108,22 @@ export default class GameEngine {
 		} else {
 			// Normal update
 			for (const obj of this.gameObjects) {
-				obj.update(deltaTime, this.gameObjects, this.input);
+				const dtObj = deltaTime * this.timeCtrl.scaleFor(obj);
+				obj.update?.(dtObj, this.gameObjects, this.input);
 			}
-			this.physics.update(this.gameObjects, deltaTime);
-			this.particleSystem.update(deltaTime);
+			this.physics.update(this.gameObjects, deltaTime, this.timeCtrl);
+  			this.particleSystem.update(deltaTime * this.timeCtrl.globalScale);
 
 			// Record the state for time travel
 			this.timeTravel.record(this.gameObjects, this.particleSystem);
+		}
+
+		if (this.input.isMiddleDown()) {
+			// this.timeCtrl.slowGlobal(0.25);
+			// this.timeCtrl.slowExcept([this.gameObjects[0]], 2, 0.3);
+		}
+		if (!this.input.isMiddleDown()) {
+			this.timeCtrl.fadeGlobal(1, 0.3);
 		}
 
 		this.camera.update();

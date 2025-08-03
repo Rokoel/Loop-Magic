@@ -25,11 +25,4 @@ export async function startGame() {
 		engine.camera.follow(player);
 		engine.start();
 	}
-
-	// Create level platforms
-	// engine.addGameObject(new Platform(0, 550, WORLD_WIDTH, 50)); // Ground
-
-	// engine.addGameObject(new Box(600, 450, 16*4, 16*4, 0.1, 0.95)); // Stacked box (bottom)
-	// engine.addGameObject(new Box(600, 400, 16*4, 16*4, 0.1, 0.95)); // Stacked box (top)
-	// engine.addGameObject(new Box(600, 350, 16*4, 16*4, 0.1, 0.95)); // Stacked box (top)
 }

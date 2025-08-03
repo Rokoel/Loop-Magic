@@ -16,27 +16,30 @@ export default class Physics {
 	/**
 	 * Updates the physics state for all game objects.
 	 * @param {Array<GameObject>} objects
-	 * @param {number}            dt  Time since last frame (s)
+	 * @param {number}            delta  Time since last frame (s)
+	 * @param {TimeController}   timeCtrl Time controller for scaling time
 	 */
-	update(objects, dt) {
-		if (dt > 0.1) dt = 0.1;
+	update(objects, delta, timeCtrl) {
+		if (delta > 0.1) delta = 0.1;
 
 		for (const obj of objects) {
-		if (!obj.isMovable) continue;
+			if (!obj.isMovable) continue;
 
-		/* 1 ─ external forces (gravity, user forces) */
-		obj.applyForce(this.gravity.scale(obj.mass));
+			const dt = delta * timeCtrl.scaleFor(obj);
 
-		/* 2 ─ integrate acceleration → velocity */
-		const acc       = obj.forces.scale(1 / obj.mass);
-		obj.velocity    = obj.velocity.add(acc.scale(dt));
-		obj.forces      = new Vector2D(0, 0);
+			/* 1 ─ external forces (gravity, user forces) */
+			obj.applyForce(this.gravity.scale(obj.mass));
 
-		/* 3 ─ move & resolve collisions */
-		this.handleCollisions(obj, objects, dt);
+			/* 2 ─ integrate acceleration → velocity */
+			const acc       = obj.forces.scale(1 / obj.mass);
+			obj.velocity    = obj.velocity.add(acc.scale(dt));
+			obj.forces      = new Vector2D(0, 0);
 
-		/* 4 ─ real kinetic friction when grounded */
-		this.applyGroundFriction(obj, dt);
+			/* 3 ─ move & resolve collisions */
+			this.handleCollisions(obj, objects, dt);
+
+			/* 4 ─ real kinetic friction when grounded */
+			this.applyGroundFriction(obj, dt);
 		}
 
 		/* 5 ─ stacking stabiliser (pop tiny penetrations) */
