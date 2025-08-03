@@ -3,7 +3,6 @@ import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES } from "../engine/textureLoa
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import { applyForce } from "../engine/ForceUtils.js";
 import ParticleSystem from "../engine/ParticleSystem.js";
-import GameEngine from "../engine/GameEngine.js";
 
 export const SceneA = {
   /* runs ONCE when scene becomes active */
@@ -29,37 +28,18 @@ export const SceneA = {
     engine.camera.follow(player);
   },
 
-  /**
-   * 
-   * @param {*} dt 
-   * @param {GameEngine} engine 
-   */
+  /* runs EVERY frame while scene is current */
   tick(dt, engine) {
     // const inp = engine.input;
     applyForce(engine.getPlayerInstance(), 1, 0); // This is not a proper fix, but I don't have time to deal with this bs
     // engine.timeCtrl.slowOnly(engine.gameObjects.filter(
     //   obj => obj instanceof Box
     // ), 0.1);
-    let player = engine.getPlayerInstance();
-    if (player.isGrounded) {
-      // LIGHT_ROCK_TEXTURES[Math.floor(Math.random() * LIGHT_ROCK_TEXTURES.length)]
-      if (Math.sign(player.velocity.x) === 1) {
-        engine.particleSystem.emit(
-          player.position.x + player.size.width/2 - Math.random()*16 - 8, player.position.y + player.size.height - 5, 1, "#4e4125ff",
-          "",
-          [-1/4*Math.PI],
-          0.3, 0.5, Math.PI/2
-        );
-      }
-      else if (Math.sign(player.velocity.x) === -1) {
-        engine.particleSystem.emit(
-          player.position.x + player.size.width/2 + Math.random()*16 + 8, player.position.y + player.size.height - 5, 1, "#4e4125ff", 
-          "",
-          [5/4*Math.PI],
-          0.3, 0.5, Math.PI/2
-        );
-      }
-    }
+    // let player = engine.getPlayerInstance();
+    // if (player.isGrounded) {
+    //   // console.log("Player is grounded");
+    //   engine.particleSystem.emit(player.position.x, player.position.y + player.size.height, 1, "#FFFF00");
+    // }
   },
 
   /* optional – tidy up (stop music, etc.) */

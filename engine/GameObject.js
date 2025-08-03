@@ -55,6 +55,12 @@ export default class GameObject {
 	 * @param {Camera} camera - The game camera for viewport transformation.
 	 */
 	draw(ctx, camera) {
+		// const DPR = window.devicePixelRatio || 1;
+		// ctx.scale(DPR, DPR);
+		ctx.imageSmoothingEnabled = false;
+		ctx.webkitImageSmoothingEnabled = false;
+		ctx.msImageSmoothingEnabled = false;
+		
 		if (this.sprite) {
 			this.sprite.draw(ctx, this.position.x, this.position.y);
 		} else {

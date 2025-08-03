@@ -145,6 +145,7 @@ export default class GameEngine {
 		for (const obj of this.gameObjects) {
 			obj.draw(this.ctx, this.camera);
 		}
+		
 		this.particleSystem.draw(this.ctx);
 
 		this.camera.revertTransform(this.ctx);

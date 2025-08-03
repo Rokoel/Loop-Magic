@@ -4,12 +4,13 @@ import Vector2D from "./Vector2D.js";
  * Represents a single particle in the system.
  */
 class Particle {
-	constructor(x, y, vx, vy, lifespan, color) {
+	constructor(x, y, vx, vy, lifespan, color, texture = null) {
 		this.position = new Vector2D(x, y);
 		this.velocity = new Vector2D(vx, vy);
 		this.lifespan = lifespan;
 		this.initialLifespan = lifespan;
 		this.color = color;
+		this.texture = texture; // ImageBitmap or HTMLImageElement or null
 	}
 
 	update(deltaTime) {
@@ -20,8 +21,12 @@ class Particle {
 	draw(ctx) {
 		const alpha = Math.max(0, this.lifespan / this.initialLifespan);
 		ctx.globalAlpha = alpha;
-		ctx.fillStyle = this.color;
-		ctx.fillRect(this.position.x, this.position.y, 3, 3);
+		if (this.texture) {
+			ctx.drawImage(this.texture, this.position.x, this.position.y, 6, 6);
+		} else {
+			ctx.fillStyle = this.color;
+			ctx.fillRect(this.position.x, this.position.y, 3, 3);
+		}
 		ctx.globalAlpha = 1.0;
 	}
 
@@ -32,7 +37,8 @@ class Particle {
 			this.velocity.x,
 			this.velocity.y,
 			this.lifespan,
-			this.color
+			this.color,
+			this.texture
 		);
 		p.initialLifespan = this.initialLifespan;
 		return p;
@@ -77,30 +83,53 @@ export default class ParticleSystem {
 	 * @param {number} y - The y-coordinate of the emission point.
 	 * @param {number} count - The number of particles to emit.
 	 * @param {string} color - The color of the particles.
+	 * @param {ImageBitmap|HTMLImageElement|string} [texture=""] - Optional image for particles.
+	 * @param {Array<number>} [angleQuarters=[0, Math.PI/2, Math.PI, 3*Math.PI/2]] - Allowed emission angles.
+	 * @param {number} [lifespanModifier=1] - Multiplies the random lifespan.
+	 * @param {number} [speedModifier=1] - Multiplies the random speed.
+	 * @param {number} [spreadModifier=1] - Multiplies the spread (angle range).
 	 */
-	emit(x, y, count, color) {
+	emit(
+		x,
+		y,
+		count,
+		color,
+		texture = "",
+		angleQuarters = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2],
+		lifespanModifier = 1,
+		speedModifier = 1,
+		spreadModifier = 1
+	) {
+		let texObj = null;
+		if (texture && typeof texture !== "string") {
+			texObj = texture;
+		} else if (typeof texture === "string" && texture.length > 0) {
+			// If you want to support loading by string, you can add a cache here.
+			texObj = null;
+		}
+
 		for (let i = 0; i < count; i++) {
-			const angle = Math.random() * Math.PI * 2;
-			const speed = Math.random() * 100 + 50;
+			// Pick a base angle from the allowed quarters
+			const baseAngle = angleQuarters[Math.floor(Math.random() * angleQuarters.length)];
+			// Spread: randomize within ±spreadModifier * (PI/8)
+			const spread = (Math.random() - 0.5) * Math.PI / 4 * spreadModifier;
+			const angle = baseAngle + spread;
+
+			const speed = (Math.random() * 100 + 50) * speedModifier;
 			const vx = Math.cos(angle) * speed;
 			const vy = Math.sin(angle) * speed;
-			const lifespan = Math.random() * 1 + 0.5;
-			this.particles.push(new Particle(x, y, vx, vy, lifespan, color));
+			const lifespan = (Math.random() * 1 + 0.5) * lifespanModifier;
+
+			this.particles.push(
+				new Particle(x, y, vx, vy, lifespan, color, texObj)
+			);
 		}
 	}
 
-	/**
-	 * Creates a deep copy of the current particle list for time travel.
-	 * @returns {Array<Particle>} A new array with cloned particles.
-	 */
 	cloneParticles() {
 		return this.particles.map((p) => p.clone());
 	}
 
-	/**
-	 * Replaces the current particle list with a new one (for rewinding).
-	 * @param {Array<Particle>} particles - The state to restore.
-	 */
 	setParticles(particles) {
 		this.particles = particles;
 	}
