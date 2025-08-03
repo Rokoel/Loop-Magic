@@ -70,6 +70,14 @@ export default class GameEngine {
 		requestAnimationFrame(this.loop.bind(this));
 	}
 
+	resetWorld() {
+		this.gameObjects.length = 0;
+		this.backgrounds.length = 0;
+		this.timeCtrl.globalScale = 1;
+		this.timeCtrl.locals.clear();
+		this.particleSystem.setParticles([]);
+	}
+
 	/**
 	 * The main game loop that runs at a fixed time step.
 	 * It accumulates real time and updates the game state accordingly.
@@ -92,6 +100,8 @@ export default class GameEngine {
 			this.update(this.fixedStep);
 			this.accumulator -= this.fixedStep;
 		}
+
+		if (this.sceneManager) this.sceneManager.tick(frameTime);
 
 		/* one draw per raf ------------------------------------------ */
 		this.draw();
@@ -119,14 +129,6 @@ export default class GameEngine {
 			this.timeTravel.record(this.gameObjects, this.particleSystem);
 		}
 
-		if (this.input.isMiddleDown()) {
-			applyForce(this.gameObjects[0], -500, 5);
-			// this.timeCtrl.slowGlobal(0.25);
-			// this.timeCtrl.slowExcept([this.gameObjects[0]], 2, 0.3);
-		}
-		if (!this.input.isMiddleDown()) {
-			this.timeCtrl.fadeGlobal(1, 0.3);
-		}
 
 		this.camera.update();
 	}

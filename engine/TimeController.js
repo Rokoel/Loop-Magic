@@ -23,7 +23,7 @@ export default class TimeController {
   slowExcept(objs, scale, dur = 0) {
     // set global first, then mark exceptions
     this.fadeGlobal(scale, dur);
-    objs.forEach(o => this._add(o, 1 / scale, dur, true));
+    objs.forEach(o => this._add(o, 1, dur, true));
   }
 
   clear(obj) { this.locals.delete(obj); }
