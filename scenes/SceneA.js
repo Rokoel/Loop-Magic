@@ -2,8 +2,8 @@ import { Player, Platform, Box } from "../engine/entities.js";
 import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES } from "../engine/textureLoader.js";
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import { applyForce } from "../engine/ForceUtils.js";
-import ParticleSystem from "../engine/ParticleSystem.js";
 import GameEngine from "../engine/GameEngine.js";
+import { chooseMovableObjects } from "../engine/InputHandler.js";
 
 export const SceneA = {
   /* runs ONCE when scene becomes active */
@@ -59,6 +59,17 @@ export const SceneA = {
           0.3, 0.5, Math.PI/2
         );
       }
+    }
+
+    if (engine.input.isKeyDown("E")) {
+      chooseMovableObjects(engine, 1).then(selected => {
+          if (selected.length === 0) {
+              console.log("No objects selected");
+          } else {
+              console.log("You picked:", selected);
+              engine.timeCtrl.slowOnly(selected, 0.1, 5);
+          }
+      });
     }
   },
 

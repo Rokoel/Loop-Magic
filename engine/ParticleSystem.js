@@ -134,3 +134,18 @@ export default class ParticleSystem {
 		this.particles = particles;
 	}
 }
+
+export function emitBoxBorder(ps, box, color = "#FFD700", density = 12, speed = 30) {
+    const { x, y } = box.position;
+    const { width: w, height: h } = box.size;
+    for (let i = 0; i < density; i++) {
+        // Top
+        ps.particles.push(new Particle(x + (w * i) / density, y, (Math.random() - 0.5) * speed, -Math.random() * speed, 0.3 + Math.random() * 0.3, color));
+        // Bottom
+        ps.particles.push(new Particle(x + (w * i) / density, y + h, (Math.random() - 0.5) * speed, Math.random() * speed, 0.3 + Math.random() * 0.3, color));
+        // Left
+        ps.particles.push(new Particle(x, y + (h * i) / density, -Math.random() * speed, (Math.random() - 0.5) * speed, 0.3 + Math.random() * 0.3, color));
+        // Right
+        ps.particles.push(new Particle(x + w, y + (h * i) / density, Math.random() * speed, (Math.random() - 0.5) * speed, 0.3 + Math.random() * 0.3, color));
+    }
+}

@@ -5,6 +5,7 @@ import TimeTravel from "./TimeTravel.js";
 import TimeController from "./TimeController.js";
 import ParticleSystem from "./ParticleSystem.js";
 import { Player } from "./entities.js";
+import { drawVignetteOverlay } from "../gui/Vignette.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -79,6 +80,20 @@ export default class GameEngine {
 	}
 
 	/**
+	 * Converts screen (canvas) coordinates to world coordinates.
+	 * @param {number} mx - The x coordinate on the screen (pixels).
+	 * @param {number} my - The y coordinate on the screen (pixels).
+	 * @returns {{x: number, y: number}} The corresponding world coordinates.
+	 */
+	screenToWorld(mx, my) {
+		// If you use zoom, divide by camera.zoom as well
+		return {
+			x: mx / this.camera.zoom + this.camera.position.x,
+			y: my / this.camera.zoom + this.camera.position.y
+		};
+	}
+
+	/**
 	 * The main game loop that runs at a fixed time step.
 	 * It accumulates real time and updates the game state accordingly.
 	 * @param {number} now - The current time in milliseconds.
@@ -145,10 +160,14 @@ export default class GameEngine {
 		for (const obj of this.gameObjects) {
 			obj.draw(this.ctx, this.camera);
 		}
-		
+
 		this.particleSystem.draw(this.ctx);
 
 		this.camera.revertTransform(this.ctx);
+
+		if (this.showVignette) {
+			drawVignetteOverlay(this.ctx, this.canvas.width, this.canvas.height);
+		}
 		// TODO: UI
 	}
 	/**
