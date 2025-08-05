@@ -15,7 +15,7 @@ export const Scene1 = {
 
     engine.hud = new HUD(engine, engine.abilityManager);
 
-    const player = new Player(100, 400);
+    const player = new Player(100, 350);
     engine.addGameObject(player);
 
     engine.addGameObject(new Platform(0, 500, 400, 40, false, RED_PLATFORM_TEXTURES));
@@ -49,8 +49,7 @@ export const Scene1 = {
 
     var player = engine.getPlayerInstance();
     if (player && player.position.y > 1000) {
-      player.position.x = 100;
-      player.position.y = 400;
+      player.returnToInitial();
       engine.input.setEnabled(false);
       engine.textBox.show(
         "He doesn't remember falling to his death - he did complete his journey!",

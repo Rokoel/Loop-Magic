@@ -35,5 +35,5 @@ window.addEventListener("show:menu", () => engine.menu.show());
 
 export async function startGame() {
 	engine.start();
-    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene1" }));
 }

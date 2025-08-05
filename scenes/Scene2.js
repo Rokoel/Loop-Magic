@@ -47,8 +47,7 @@ export const Scene2 = {
     // Transition to next scene if player reaches the last platform
     var player = engine.getPlayerInstance();
     if (player && player.position.y > 1000) {
-      player.position.x = 100;
-      player.position.y = 400;
+      player.returnToInitial();
       engine.input.setEnabled(false);
       engine.textBox.show(
         "He doesn't remember falling to his death - he did complete his journey!",

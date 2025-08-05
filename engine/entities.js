@@ -22,6 +22,7 @@ export class Player extends GameObject {
         this.moveForce  = 500000; // N      – how hard we push each frame
         this.isGrounded = false;
         this.facingLeft = false;
+        this.initialPosition = new Vector2D(x, y);
 
         const sheet = new MultiSprite({
         idle : { src: "assets/player_idle.png",
@@ -34,6 +35,10 @@ export class Player extends GameObject {
 
         sheet.setAnimation("idle");
         this.attachSprite(sheet);
+    }
+
+    returnToInitial() {
+        this.position = this.initialPosition;
     }
 
     update(deltaTime, gameObjects, input) {
