@@ -96,25 +96,6 @@ export class Platform extends GameObject {
     }
 }
 
-class TexturedPlatform extends GameObject {
-    constructor(x, y, width, height, textureSrc) {
-        super(x, y, width, height, "#4CAF50");
-        this.isMovable = false;
-        this.texture = new Sprite(textureSrc, width, height, {
-            idle: { frames: [0], speed: 1000 }
-        }, 4);
-        this.texture.setAnimation("idle");
-    }
-    update(deltaTime, gameObjects, input) {
-        if (this.texture) this.texture.update(deltaTime);
-    }
-    draw(ctx, camera) {
-        const offsetX = this.position.x - camera.position.x;
-        const offsetY = this.position.y - camera.position.y;
-        this.texture.draw(ctx, offsetX, offsetY);
-    }
-}
-
 export class Box extends GameObject {
     /**
      * A movable box that can be pushed, stacked, and used to push other objects.

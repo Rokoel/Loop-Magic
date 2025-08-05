@@ -1,35 +1,39 @@
-export async function startGame() {
-	const sceneMgr = new SceneManager(engine);
-	sceneMgr.register("SceneA", SceneA);
-	// sceneMgr.register("SceneB", SceneB);
-	engine.sceneManager = sceneMgr;   // hook it in
-
-	sceneMgr.change("SceneA");        // first scene
-	engine.start();
-}
-
 import GameEngine from "./engine/GameEngine.js";
 import SceneManager from "./engine/SceneManager.js";
-import { SceneA }   from "./scenes/SceneA.js";
+import { Scene1 }   from "./scenes/Scene1.js";
+import { Scene2 }   from "./scenes/Scene2.js";
+import { Scene3 }   from "./scenes/Scene3.js";
 import Menu from "./gui/Menu.js";
 import Music from "./gui/Music.js";
+import showAbilitiesInfo from "./gui/AbilitiesInfo.js";
 
 const canvas = document.getElementById("gameCanvas");
 const engine = new GameEngine(canvas, 2000, 2000);
-
-// Create music instance (replace with your own track)
+const sceneMgr = new SceneManager(engine);
 const music = new Music("assets/music.m4a", 0.3);
-music.play(); // start by default
+sceneMgr.register("Scene1", Scene1);
+sceneMgr.register("Scene2", Scene2);
+sceneMgr.register("Scene3", Scene3);
+engine.sceneManager = sceneMgr;
 
-// Show menu
+
 const menu = new Menu({
     onBegin: () => {
-        // Start your game, e.g. load scene 1
-        window.dispatchEvent(new CustomEvent("scene:change", { detail: "SceneA" }));
+        startGame();
     },
     onMusicToggle: (on) => {
         music.setEnabled(on);
     },
     musicOn: false
 });
+
+engine.menu = menu;
 menu.show();
+
+window.addEventListener("show:abilities", () => showAbilitiesInfo(engine.abilityManager));
+window.addEventListener("show:menu", () => engine.menu.show());
+
+export async function startGame() {
+	engine.start();
+    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+}

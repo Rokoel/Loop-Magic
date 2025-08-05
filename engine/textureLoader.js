@@ -12,3 +12,8 @@ export const RED_PLATFORM_TEXTURES = await Promise.all(
   ["../assets/red_rock_tile.png", ]
   .map(async src => createImageBitmap(await fetch(src).then(r => r.blob())))
 );
+
+export const SKY = await Promise.all(
+  ["../assets/lighter_sky.png", "../assets/darker_sky.png"]
+  .map(async src => createImageBitmap(await fetch(src).then(r => r.blob())))
+);

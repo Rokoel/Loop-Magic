@@ -52,6 +52,16 @@ export default class Menu {
         };
         menu.appendChild(restartBtn);
 
+        // Abilities Info button
+        const infoBtn = document.createElement("button");
+        infoBtn.textContent = "Abilities Info";
+        infoBtn.style.marginTop = "1em";
+        infoBtn.onclick = () => {
+            this.hide();
+            window.dispatchEvent(new CustomEvent("show:abilities"));
+        };
+        menu.appendChild(infoBtn);
+
         // Music toggle button
         this.musicBtn = document.createElement("button");
         this.musicBtn.textContent = this.musicOn ? "Music: On" : "Music: Off";

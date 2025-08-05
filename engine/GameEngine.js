@@ -7,6 +7,7 @@ import ParticleSystem from "./ParticleSystem.js";
 import { Player } from "./entities.js";
 import { drawVignetteOverlay } from "../gui/Vignette.js";
 import TextBox from "../gui/TextBox.js";
+import AbilityManager from "./AbilityManager.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -49,11 +50,12 @@ export default class GameEngine {
 		this.timeTravel = new TimeTravel(60 * 10);
 		this.timeCtrl = new TimeController();
 		this.particleSystem = new ParticleSystem();
-		this.textBox = new TextBox(canvas);
+		this.textBox = new TextBox(canvas, this);
+		this.abilityManager = new AbilityManager();
 	}
 
-	pause()  { this.paused = true;  }
-  	resume() { this.paused = false; }
+	pause()  { this._paused = true;  }
+  	resume() { this._paused = false; }
 
 	/**
 	 * Adds a game object to the engine's management.
@@ -104,21 +106,24 @@ export default class GameEngine {
 		/* accumulate real time -------------------------------------- */
 		let frameTime = (now - this.lastTime) / 1000;
 		this.lastTime = now;
-
 		/* avoid spiral of death on tab-switch */
 		const MAX_FRAME = 0.25;           // 250 ms
 		if (frameTime > MAX_FRAME) frameTime = MAX_FRAME;
 
-		this.accumulator += frameTime;
+		this.textBox.update(frameTime);
+		this.camera.update();
+		
+		if (!this._paused) {
+			this.accumulator += frameTime;
+			this.timeCtrl.update(frameTime);
+			/* run micro-steps ------------------------------------------- */
+			while (this.accumulator >= this.fixedStep) {
+				this.update(this.fixedStep);
+				this.accumulator -= this.fixedStep;
+			}
 
-		this.timeCtrl.update(frameTime);
-		/* run micro-steps ------------------------------------------- */
-		while (this.accumulator >= this.fixedStep) {
-			this.update(this.fixedStep);
-			this.accumulator -= this.fixedStep;
-		}
-
-		if (this.sceneManager) this.sceneManager.tick(frameTime);
+			if (this.sceneManager) this.sceneManager.tick(frameTime);
+        }
 
 		/* one draw per raf ------------------------------------------ */
 		this.draw();
@@ -135,20 +140,18 @@ export default class GameEngine {
 			this.timeTravel.rewind(this.gameObjects, this.particleSystem);
 		} else {
 			// Normal update
-			for (const obj of this.gameObjects) {
-				const dtObj = deltaTime * this.timeCtrl.scaleFor(obj);
-				obj.update?.(dtObj, this.gameObjects, this.input);
+			if (!this._paused) {
+				for (const obj of this.gameObjects) {
+					const dtObj = deltaTime * this.timeCtrl.scaleFor(obj);
+					obj.update?.(dtObj, this.gameObjects, this.input);
+				}
+				this.physics.update(this.gameObjects, deltaTime, this.timeCtrl);
+				this.particleSystem.update(deltaTime * this.timeCtrl.globalScale);
+
+				// Record the state for time travel
+				this.timeTravel.record(this.gameObjects, this.particleSystem);
 			}
-			this.physics.update(this.gameObjects, deltaTime, this.timeCtrl);
-  			this.particleSystem.update(deltaTime * this.timeCtrl.globalScale);
-
-			// Record the state for time travel
-			this.timeTravel.record(this.gameObjects, this.particleSystem);
 		}
-
-		this.textBox.update(deltaTime);
-
-		this.camera.update();
 	}
 
 	/**
@@ -171,9 +174,10 @@ export default class GameEngine {
 		if (this.showVignette) {
 			drawVignetteOverlay(this.ctx, this.canvas.width, this.canvas.height);
 		}
+		if (this.hud) this.hud.draw(this.ctx);
 		if (this.textBox && this.textBox.active) this.textBox._draw();
-		// TODO: UI
 	}
+	
 	/**
 	 * Adds a background to the game engine.
 	 * @param {BackgroundRect} bg - The background to add.

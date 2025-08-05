@@ -10,12 +10,9 @@
 	<body>
 		<canvas id="gameCanvas"></canvas>
 		<script type="module">
-			import { startGame } from "./main.js";
+			import "./main.js";
 			import "./level/indexEditor.js"; // the file sets itself up
 
-			if (!location.search.includes("editor")) {
-				startGame();
-			}
 			/* if "?editor" is present, main loop is skipped and the
 				LevelEditor takes control. */
 		</script>

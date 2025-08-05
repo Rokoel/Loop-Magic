@@ -4,7 +4,7 @@ export default class TextBox {
      * @param {HTMLCanvasElement} canvas
      * @param {string} font - e.g. "24px monospace"
      */
-    constructor(canvas, font = "32px monospace") {
+    constructor(canvas, engine, font = "18px monospace") {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.font = font;
@@ -18,6 +18,7 @@ export default class TextBox {
         this.skipHint = "Press SPACE or ENTER to continue";
         this.blockInput = true;
         this._boundKey = this._onKey.bind(this);
+        this.engine = engine;
     }
 
     show(text, onDone = null) {
@@ -27,6 +28,7 @@ export default class TextBox {
         this.timer = 0;
         this.active = true;
         this.onDone = onDone;
+        if (this.engine) this.engine.pause();
         window.addEventListener("keydown", this._boundKey);
     }
 
@@ -45,6 +47,7 @@ export default class TextBox {
     hide() {
         this.active = false;
         window.removeEventListener("keydown", this._boundKey);
+        if (this.engine) this.engine.resume();
         if (this.onDone) this.onDone();
     }
 
