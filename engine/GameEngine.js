@@ -41,6 +41,7 @@ export default class GameEngine {
 
 		this.gameObjects = [];
 		this.lastTime = 0;
+		this.ignoreNormalUpdate = false;
 
 		this.backgrounds = [];
 
@@ -114,15 +115,17 @@ export default class GameEngine {
 		this.camera.update();
 		
 		if (!this._paused) {
-			this.accumulator += frameTime;
-			this.timeCtrl.update(frameTime);
-			/* run micro-steps ------------------------------------------- */
-			while (this.accumulator >= this.fixedStep) {
-				this.update(this.fixedStep);
-				this.accumulator -= this.fixedStep;
-			}
-
 			if (this.sceneManager) this.sceneManager.tick(frameTime);
+			if (!this.ignoreNormalUpdate){
+				this.accumulator += frameTime;
+				this.timeCtrl.update(frameTime);
+				/* run micro-steps ------------------------------------------- */
+				while (this.accumulator >= this.fixedStep) {
+					this.update(this.fixedStep);
+					this.accumulator -= this.fixedStep;
+				}
+				this.ignoreNormalUpdate = false;
+			}
         }
 
 		/* one draw per raf ------------------------------------------ */
@@ -135,9 +138,8 @@ export default class GameEngine {
 	 * @param {number} deltaTime - The time elapsed since the last frame.
 	 */
 	update(deltaTime) {
-		if (this.input.isKeyDown("r")) {
-			// Rewind time
-			this.timeTravel.rewind(this.gameObjects, this.particleSystem);
+		if (this.ignoreNormalUpdate) {
+			// ignoring normal update (for example for time reverse).
 		} else {
 			// Normal update
 			if (!this._paused) {

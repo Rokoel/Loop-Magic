@@ -30,6 +30,8 @@ export default class GameObject {
 
 		// Sprite and animation
 		this.sprite = null;
+
+		this.triggers = [];
 	}
 
 	/**
@@ -90,4 +92,20 @@ export default class GameObject {
 			),
 		};
 	}
+
+	/**
+     * Attach a trigger to this object.
+     * @param {function(GameObject, GameObject):void} callback
+     */
+    addTrigger(callback) {
+        this.triggers.push(callback);
+    }
+
+    /**
+     * Call all triggers with the other object as argument.
+     * @param {GameObject} other
+     */
+    fireTriggers(other) {
+        for (const cb of this.triggers) cb(this, other);
+    }
 }

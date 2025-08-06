@@ -57,15 +57,7 @@ export const Scene2 = {
       );
     }
     if (player && player.position.x > 1000 && !this._ending) {
-      this._ending = true;
-      engine.input.setEnabled(false);
-      engine.textBox.show(
-        "And though at first he didn't use the newly obtained powers that much, he knew that he could access reversing time at any point by pressing R.",
-        () => {
-          engine.input.setEnabled(true);
-          window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
-        }
-      );
+      window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
     }
   },
 

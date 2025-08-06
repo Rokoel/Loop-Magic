@@ -1,3 +1,5 @@
+// import GameEngine from "./GameEngine";
+
 /**
  * Manages the recording and rewinding of game state for the time travel mechanic.
  */
@@ -39,17 +41,16 @@ export default class TimeTravel {
 
 	/**
 	 * Rewinds the game state by one frame.
-	 * @param {Array<GameObject>} gameObjects - The list of all game objects.
-	 * @param {ParticleSystem} particleSystem - The game's particle system.
+	 * @param {GameEngine} engine
 	 */
-	rewind(gameObjects, particleSystem) {
+	rewind(engine) {
 		if (this.history.length <= 1) return; // Can't rewind past the beginning
 
 		const lastState = this.history.pop();
 
 		// Restore object states
 		for (const state of lastState.objects) {
-			const obj = gameObjects.find((go) => go.id === state.id);
+			const obj = engine.gameObjects.find((go) => go.id === state.id);
 			if (obj) {
 				obj.position = state.position;
 				obj.velocity = state.velocity;
@@ -60,6 +61,7 @@ export default class TimeTravel {
 		}
 
 		// Restore particle system state
-		particleSystem.setParticles(lastState.particles);
+		engine.particleSystem.setParticles(lastState.particles);
+		engine.ignoreNormalUpdate = true;
 	}
 }

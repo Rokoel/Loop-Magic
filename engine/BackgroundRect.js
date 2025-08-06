@@ -37,7 +37,7 @@ export default class BackgroundRect {
         minTile,
         maxTile
       );
-    } else {dsdwdawdwadadwdawd         
+    } else {      
       /* IMAGE mode – textures is ONE bitmap */
       this.image = textures;
     }

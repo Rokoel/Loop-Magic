@@ -162,6 +162,9 @@ export default class Physics {
 					
 					remainingTime *= (1 - earliestCollision.time);
 				}
+
+				obj.fireTriggers(earliestCollision.other);
+    			earliestCollision.other.fireTriggers(obj);
 				
 				remainingTime = Math.max(remainingTime, 0);
 			} else {
