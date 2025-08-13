@@ -33,7 +33,10 @@ export const Scene5 = {
 
     window.addEventListener("show:menu", () => engine.menu.show());
     window.addEventListener("scene:restart", () => {
-      window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+      engine.fadeOut(1, () => {
+          window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene5" }));
+          engine.fadeIn(1);
+      });
     });
 
     // Show dialog
@@ -74,7 +77,6 @@ export const Scene5 = {
       this._waitingForBox = false;
     }
 
-    // Transition to next scene if player crosses the gap
     const player = engine.getPlayerInstance();
     if (player && player.position.y > 1000) {
       player.returnToInitial();
@@ -83,15 +85,6 @@ export const Scene5 = {
         "He doesn't remember falling to his death - he did complete his journey!",
         () => {
           engine.input.setEnabled(true);
-        }
-      );
-    }
-    if (player && player.position.x > 950) {
-      engine.input.setEnabled(false);
-      engine.textBox.show(
-        "I'm sorry, but due to time constraints, that's all I have for you right now. " +
-        "I hope you enjoyed this prototype! ") (() => {
-          window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene6" }));
         }
       );
     }

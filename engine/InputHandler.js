@@ -78,7 +78,7 @@ export function chooseMovableObjects(engine, count) {
         function drawEffects() {
             if (!active) return;
             engine.draw(); // redraw scene
-            engine.showVignette = true
+            engine.showVignette(2);
 
             // Highlight already chosen
             for (const obj of chosen) {
@@ -92,7 +92,7 @@ export function chooseMovableObjects(engine, count) {
 
             // Particle border for hovered
             if (hovered) {
-                emitBoxBorder(engine.particleSystem, hovered, "#FFD700", 16, 40);
+                emitBoxBorder(engine.particleSystem, hovered, "#FFD700", 8, 40);
             }
 
             requestAnimationFrame(drawEffects);
@@ -117,7 +117,7 @@ export function chooseMovableObjects(engine, count) {
 
         function finish(cancelled = false) {
             active = false;
-			engine.showVignette = false;
+			engine.hideVignette(2);
             window.removeEventListener("mousedown", onClick);
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("keydown", onKey);

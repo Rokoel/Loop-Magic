@@ -4,6 +4,7 @@ export default class Menu {
         this.onMusicToggle = onMusicToggle;
         this.musicOn = musicOn;
         this._build();
+        this.visible = false;
     }
 
     _build() {
@@ -79,9 +80,11 @@ export default class Menu {
     hide() {
         const menu = document.getElementById("main-menu");
         if (menu) menu.remove();
+        this.visible = false;
     }
 
     show() {
         this._build();
+        this.visible = true;
     }
 }

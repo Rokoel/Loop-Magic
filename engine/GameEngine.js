@@ -8,6 +8,7 @@ import { Player } from "./entities.js";
 import { drawVignetteOverlay } from "../gui/Vignette.js";
 import TextBox from "../gui/TextBox.js";
 import AbilityManager from "./AbilityManager.js";
+import { drawFadeOverlay } from "../gui/Fade.js";
 
 /**
  * The main orchestrator for the game. Manages the game loop,
@@ -42,6 +43,17 @@ export default class GameEngine {
 		this.gameObjects = [];
 		this.lastTime = 0;
 		this.ignoreNormalUpdate = false;
+
+		this.vignetteAlpha = 0;       // current alpha
+		this.vignetteTarget = 0;      // target alpha (0 = invisible, 1 = full)
+		this.vignetteSpeed = 2;       // fade speed in alpha units per second
+
+		this.fadeAlpha = 0;        // current alpha (0 = transparent, 1 = full black)
+		this.fadeTarget = 0;       // target alpha
+		this.fadeSpeed = 1;        // alpha units per second
+		this.fadeCallback = null;  // called when fade reaches target
+
+		this.fullScreenImage = null;
 
 		this.backgrounds = [];
 
@@ -129,7 +141,30 @@ export default class GameEngine {
         }
 
 		/* one draw per raf ------------------------------------------ */
+		if (this.vignetteAlpha < this.vignetteTarget) {
+			this.vignetteAlpha = Math.min(this.vignetteAlpha + this.vignetteSpeed * frameTime, this.vignetteTarget);
+		} else if (this.vignetteAlpha > this.vignetteTarget) {
+			this.vignetteAlpha = Math.max(this.vignetteAlpha - this.vignetteSpeed * frameTime, this.vignetteTarget);
+		}
+
+		if (this.fadeAlpha < this.fadeTarget) {
+			this.fadeAlpha = Math.min(this.fadeAlpha + this.fadeSpeed * frameTime, this.fadeTarget);
+			if (this.fadeAlpha === this.fadeTarget && this.fadeCallback) {
+				const cb = this.fadeCallback;
+				this.fadeCallback = null;
+				cb();
+			}
+		} else if (this.fadeAlpha > this.fadeTarget) {
+			this.fadeAlpha = Math.max(this.fadeAlpha - this.fadeSpeed * frameTime, this.fadeTarget);
+			if (this.fadeAlpha === this.fadeTarget && this.fadeCallback) {
+				const cb = this.fadeCallback;
+				this.fadeCallback = null;
+				cb();
+			}
+		}
+
 		this.draw();
+		this.ignoreNormalUpdate = false;
 		requestAnimationFrame(this.loop.bind(this));
 	}
 
@@ -172,12 +207,18 @@ export default class GameEngine {
 		this.particleSystem.draw(this.ctx);
 
 		this.camera.revertTransform(this.ctx);
-
-		if (this.showVignette) {
-			drawVignetteOverlay(this.ctx, this.canvas.width, this.canvas.height);
-		}
-		if (this.hud) this.hud.draw(this.ctx);
 		if (this.textBox && this.textBox.active) this.textBox._draw();
+		if (this.vignetteAlpha > 0) {
+			drawVignetteOverlay(this.ctx, this.canvas.width, this.canvas.height, this.vignetteAlpha);
+		}
+
+		if (this.fullScreenImage && this.fullScreenImage.active) {
+			this.fullScreenImage.draw(this.ctx, this.canvas.width, this.canvas.height);
+		}
+		if (this.fadeAlpha > 0) {
+			drawFadeOverlay(this.ctx, this.canvas.width, this.canvas.height, this.fadeAlpha);
+		}
+		if (this.hud && !(this.fullScreenImage && this.fullScreenImage.active)) this.hud.draw(this.ctx);
 	}
 	
 	/**
@@ -191,6 +232,32 @@ export default class GameEngine {
 	 */
 	clearBackgrounds() { this.backgrounds.length = 0; }
 
+	showVignette(speed = 2) {
+		this.vignetteTarget = 1;
+		this.vignetteSpeed = speed;
+	}
+
+	hideVignette(speed = 2) {
+		this.vignetteTarget = 0;
+		this.vignetteSpeed = speed;
+	}
+
+	fadeIn(duration = 1, callback = null) {
+		this.fadeTarget = 0;
+		this.fadeSpeed = 1 / duration;
+		this.fadeCallback = callback;
+	}
+
+	fadeOut(duration = 1, callback = null) {
+		this.fadeTarget = 1;
+		this.fadeSpeed = 1 / duration;
+		this.fadeCallback = callback;
+	}
+
+	/**
+	 * Retrieves the first instance of the Player in the game objects.
+	 * @returns {Player|null} The Player instance or null if not found.
+	 */
 	getPlayerInstance() {
 		return this.gameObjects.filter(obj => obj instanceof Player)[0] || null;
 	}

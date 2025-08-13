@@ -1,6 +1,6 @@
-export function drawVignetteOverlay(ctx, w, h) {
+export function drawVignetteOverlay(ctx, w, h, alpha = 1) {
     ctx.save();
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = alpha;
     const grad = ctx.createRadialGradient(
         w / 2, h / 2, Math.min(w, h) / 4,
         w / 2, h / 2, Math.max(w, h) / 1.1

@@ -53,10 +53,6 @@ export default class TextBox {
 
     _onKey(e) {
         if (!this.active) return;
-        if (e.key === "Escape") {
-            this.hide();
-            window.dispatchEvent(new CustomEvent("show:menu"));
-        }
         if (e.key === " " || e.key === "Enter") {
             if (this.visibleText.length < this.text.length) {
                 // Instantly show all text

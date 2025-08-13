@@ -2,6 +2,7 @@ import { Player, Platform, Box } from "../engine/entities.js";
 import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES } from "../engine/textureLoader.js";
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import HUD from "../gui/HUD.js";
+import FullScreenImage from "../gui/FullScreenImage.js";
 
 export const Scene2 = {
   init(engine) {
@@ -30,17 +31,22 @@ export const Scene2 = {
 
     window.addEventListener("show:menu", () => engine.menu.show());
     window.addEventListener("scene:restart", () => {
-      window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene2" }));
+      engine.fadeOut(1, () => {
+        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene2" }));
+        engine.fadeIn(1);
+      });
     });
 
-    // Show dialog
-
-    engine.input.setEnabled(false);
-    engine.textBox.show(
-      "He encountered different obstacles on his way. " +
-      "Some of them were *pushable*.",
-      () => { engine.input.setEnabled(true); }
-    );
+    engine.fadeAlpha = 1;
+    engine.fadeIn(1);
+    engine.fullScreenImage = new FullScreenImage("assets/scene2_intro.png", () => {
+      engine.input.setEnabled(false);
+      engine.textBox.show(
+        "He encountered different obstacles on his way. " +
+        "Some of them were *pushable*.",
+        () => { engine.input.setEnabled(true); }
+      );
+    });
   },
 
   tick(dt, engine) {
@@ -57,7 +63,10 @@ export const Scene2 = {
       );
     }
     if (player && player.position.x > 1000 && !this._ending) {
-      window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+      engine.fadeOut(1, () => {
+        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+        engine.fadeIn(1);
+      });
     }
   },
 
