@@ -2,7 +2,7 @@ import { Player, Platform, Box } from "../engine/entities.js";
 import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES, SKY, MAGE_CITY } from "../engine/textureLoader.js";
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import HUD from "../gui/HUD.js";
-// import FullScreenImage from "../gui/FullScreenImage.js";
+import FullScreenImage from "../gui/FullScreenImage.js";
 import GameEngine from "../engine/GameEngine.js"
 
 export const Scene3 = {
@@ -27,33 +27,37 @@ export const Scene3 = {
       if (other.id === "player") {
         box.isMovable = true;
         engine.input.setEnabled(false);
-        engine.textBox.show("The boy was NOT allowed to enter and was laughed at!", () => {
-          setTimeout(() => {
-            engine.textBox.show("He started falling to his death...", () => {
-              setTimeout(() => {
-                engine.textBox.show("There was nothing he could do... Except concentrate!", () => {
-                  setTimeout(() => {
-                    engine.textBox.show("...So concentrate he did!", () => {
-                      setTimeout(() => {
-                        engine.textBox.show("But NOTHING WAS HAPPENING!!!", () => {
-                          setTimeout(() => {
-                            engine.textBox.show("Until... He tried pressing and holding R...", () => {
-                              engine.showVignette(2);
-                              engine.input.setEnabled(true);
-                              engine.timeCtrl.slowGlobal(0.1, 0.3);
-                              this._allowRewind = true;
-                            });
-                          }, 100);
-                        });
-                      }, 100);
-                    });
-                  }, 100);
-                });
-              }, 100);
-            });
-          }, 100);
+        engine.fadeAlpha = 1;
+        engine.fadeIn(1);
+        engine.fullScreenImage = new FullScreenImage("assets/Phew.png", () => {
         });
-        self.triggers = [];
+        engine.textBox.show("The boy was NOT allowed to enter and was laughed at!", () => {
+            setTimeout(() => {
+              engine.textBox.show("He started falling to his death...", () => {
+                setTimeout(() => {
+                  engine.textBox.show("There was nothing he could do... Except concentrate!", () => {
+                    setTimeout(() => { 
+                      engine.textBox.show("...So concentrate he did!", () => {
+                        setTimeout(() => {
+                          engine.textBox.show("But NOTHING WAS HAPPENING!!!", () => {
+                            setTimeout(() => {
+                              engine.textBox.show("Until... He tried pressing and holding R...", () => {
+                                engine.showVignette(2);
+                                engine.input.setEnabled(true);
+                                engine.timeCtrl.slowGlobal(0.1, 0.3);
+                                this._allowRewind = true;
+                              });
+                            }, 100);
+                          });
+                        }, 100);
+                      });
+                    }, 100);
+                  });
+                }, 100);
+              });
+            }, 100);
+          });
+          self.triggers = [];
       }
     });
     engine.addGameObject(box);

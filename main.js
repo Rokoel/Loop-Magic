@@ -45,6 +45,6 @@ window.addEventListener("keydown", (e) => {
 
 export async function startGame() {
 	engine.start();
-    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene2" }));
+    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
     engine.fadeIn(1);
 }
