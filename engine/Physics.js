@@ -29,7 +29,7 @@ export default class Physics {
 
 			/* 1 ─ external forces (gravity, user forces) */
 			obj.applyForce(this.gravity.scale(obj.mass));
-
+			
 			/* 2 ─ integrate acceleration → velocity */
 			const acc       = obj.forces.scale(1 / obj.mass);
 			obj.velocity    = obj.velocity.add(acc.scale(dt));

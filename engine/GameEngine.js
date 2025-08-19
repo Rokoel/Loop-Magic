@@ -21,16 +21,17 @@ export default class GameEngine {
 	 * @param {number} worldHeight - The total height of the game world.
 	 */
 	constructor(canvas, worldWidth, worldHeight) {
-		this.canvas = canvas;
 
 		const DPR = window.devicePixelRatio || 1;
-		const CSS_WIDTH  = 800;
-		const CSS_HEIGHT = 600;
+		const CSS_WIDTH  = 1600;
+		const CSS_HEIGHT = 900;
 
 		canvas.style.width  = CSS_WIDTH  + "px";
 		canvas.style.height = CSS_HEIGHT + "px";
 		canvas.width        = CSS_WIDTH  * DPR;
 		canvas.height       = CSS_HEIGHT * DPR;
+
+		this.canvas = canvas;
 		this.paused = false;
 
 		this.ctx = canvas.getContext("2d");
@@ -59,7 +60,7 @@ export default class GameEngine {
 
 		this.input = new InputHandler(this.canvas);
 		this.physics = new Physics(worldWidth, worldHeight);
-		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width, this.canvas.height);
+		this.camera = new Camera(worldWidth, worldHeight, this.canvas.width / DPR, this.canvas.height / DPR);
 		this.timeTravel = new TimeTravel(60 * 10);
 		this.timeCtrl = new TimeController();
 		this.particleSystem = new ParticleSystem();

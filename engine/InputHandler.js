@@ -86,7 +86,7 @@ export function chooseMovableObjects(engine, count) {
                 ctx.save();
                 ctx.strokeStyle = "#FFD700";
                 ctx.lineWidth = 4;
-                ctx.strokeRect(obj.position.x, obj.position.y, obj.size.width, obj.size.height);
+                ctx.strokeRect(obj.position.x + obj.size.width/2, obj.position.y - obj.size.height, obj.size.width, obj.size.height);
                 ctx.restore();
             }
 

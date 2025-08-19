@@ -4,11 +4,11 @@ import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import HUD from "../gui/HUD.js";
 import { chooseMovableObjects } from "../engine/InputHandler.js";
 
-export const Scene5 = {
+export const Scene6 = {
   init(engine) {
     // Abilities: Unlock local time slow (1 use)
     engine.abilityManager.setAbility("globalTimeReverse", Infinity, Infinity);
-    engine.abilityManager.setAbility("localTimeSlow", 1, 1);
+    engine.abilityManager.setAbility("localTimeSlow", 2, 1);
     engine.abilityManager.setAbility("localTimeStop", 0, 0);
     engine.abilityManager.setAbility("globalTimeSlow", 0, 0);
     engine.abilityManager.setAbility("timeReverseN", 0, 0, { N: 3 });
@@ -21,9 +21,11 @@ export const Scene5 = {
     engine.addGameObject(player);
 
     engine.addGameObject(new Platform(0, 500, 400, 40, false, RED_PLATFORM_TEXTURES));
-    engine.addGameObject(new Platform(700, 400, 300, 40, false, RED_PLATFORM_TEXTURES));
+    engine.addGameObject(new Platform(900, 400, 300, 40, false, RED_PLATFORM_TEXTURES));
     const movingBox = new Box(500, 470, 128, 128, 2, 0.2, "#FFFFFF", "assets/red_rock_tile.png");
+    const movingBox2 = new Box(700, 470, 128, 128, 2, 0.2, "#FFFFFF", "assets/red_rock_tile.png");
     engine.addGameObject(movingBox);
+    engine.addGameObject(movingBox2);
 
     engine.addBackground(
       new BackgroundRect(-2000, -2000, 4000, 4000, BG_MODE.TILED, LIGHT_ROCK_TEXTURES, 64, 128)
@@ -34,7 +36,7 @@ export const Scene5 = {
     window.addEventListener("show:menu", () => engine.menu.show());
     window.addEventListener("scene:restart", () => {
       engine.fadeOut(1, () => {
-          window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene5" }));
+          window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene6" }));
           engine.fadeIn(1);
       });
     });
@@ -42,7 +44,7 @@ export const Scene5 = {
     // Show dialog
     engine.input.setEnabled(false);
     engine.textBox.show(
-      "He has been climbing for a while now, getting stronger. Suddenly, he realized, that he could slow down objects (pressing E and choosing an object with mouse left click does that)",
+      "He tried slowing down two objects at once...",
       () => {
         engine.input.setEnabled(true);
         engine.timeCtrl.slowGlobal(0.05, 0.3);
@@ -60,9 +62,9 @@ export const Scene5 = {
     if (engine.input.isKeyDown("E") && engine.abilityManager.use("localTimeSlow")) {
       engine.input.setEnabled(false);
       engine.textBox.show(
-        "Click the box to slow it down! Press ESC to cancel.",
+        "Click the boxes consequently to slow them down! Press ESC to cancel.",
         () => {
-          chooseMovableObjects(engine, 1).then(selected => {
+          chooseMovableObjects(engine, 2).then(selected => {
             if (selected.length > 0) {
               engine.timeCtrl.fadeGlobal(1, 0.3);
               engine.timeCtrl.slowOnly(selected, 0, 5);
@@ -91,9 +93,9 @@ export const Scene5 = {
       );
     }
 
-    if (player && player.position.x >= 750 && player.position.x + player.size.width <= 1000) {
+    if (player && player.position.x >= 950 && player.position.x + player.size.width <= 1200) {
       engine.fadeOut(1, () => {
-        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene6" }));
+        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene7" }));
         engine.fadeIn(1);
       });
     }

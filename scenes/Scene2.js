@@ -62,7 +62,7 @@ export const Scene2 = {
         }
       );
     }
-    if (player && player.position.x > 1000 && !this._ending) {
+    if (player && player.position.x > 1000) {
       engine.fadeOut(1, () => {
         window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
         engine.fadeIn(1);

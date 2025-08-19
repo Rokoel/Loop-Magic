@@ -66,8 +66,9 @@ export default class TextBox {
 
     _draw() {
         const ctx = this.ctx;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
+        const DPR = window.devicePixelRatio || 1;
+        const w = this.canvas.width/DPR;
+        const h = this.canvas.height/DPR;
         const blockH = 120;
         ctx.save();
         // Black semi-transparent block

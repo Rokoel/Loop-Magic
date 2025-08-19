@@ -20,8 +20,13 @@ export const Scene4 = {
     engine.addGameObject(player);
 
     engine.addGameObject(new Platform(0, 500, 400, 40, false, RED_PLATFORM_TEXTURES));
-    
+    engine.addGameObject(new Platform(500, 400, 300, 40, false, RED_PLATFORM_TEXTURES));
+    engine.addGameObject(new Platform(900, 300, 200, 40, false, RED_PLATFORM_TEXTURES));
 
+    engine.addGameObject(new Platform(1300, 200, 300, 40, false, RED_PLATFORM_TEXTURES));
+    engine.addGameObject(new Platform(1700, 100, 200, 40, false, RED_PLATFORM_TEXTURES));
+    engine.addGameObject(new Platform(1300, -50, 300, 40, false, RED_PLATFORM_TEXTURES));
+    
     engine.addBackground(
       new BackgroundRect(-2000, -2000, 6000, 4000, BG_MODE.TILED, SKY, 32, 256)
     );
@@ -35,6 +40,12 @@ export const Scene4 = {
         engine.fadeIn(1);
       });
     });
+    
+    engine.input.setEnabled(false);
+    engine.textBox.show(
+      "The boy has continued his ascent to the city with his newly realized powers.",
+      () => { engine.input.setEnabled(true); }
+    );
   },
   /**
    * 
@@ -42,31 +53,15 @@ export const Scene4 = {
    * @param {GameEngine} engine 
    */
   tick(dt, engine) {
-    var player = engine.getPlayerInstance();
-    if (player && player.position.y > 1000) {
-      player.returnToInitial();
-      engine.input.setEnabled(false);
-      engine.textBox.show(
-        "He doesn't remember falling to his death - he did complete his journey!",
-        () => {
-          engine.input.setEnabled(true);
-        }
-      );
+    if (engine.input.isKeyDown("R")) {
+      engine.timeTravel.rewind(engine);
     }
-    if (player && player.position.x > 1900 && !this._ending) {
-        this._ending = true; // prevent multiple triggers
-        engine.input.setEnabled(false);
-        engine.textBox.show(
-            "He blacked out from time to time. " +
-            "He didn't think too much about it though.",
-            () => {
-                engine.input.setEnabled(true);
-                engine.fadeOut(1, () => {
-                  window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene2" }));
-                  engine.fadeIn(1);
-                });
-            }
-        );
+    var player = engine.getPlayerInstance();
+    if (player && player.position.x >= 1300 && player.position.x + player.size.width <= 1600 && player.position.y + player.size.height <= -50) {
+      engine.fadeOut(1, () => {
+        window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene5" }));
+        engine.fadeIn(1);
+      });
     }
   },
 

@@ -5,19 +5,24 @@ import { Scene2 }   from "./scenes/Scene2.js";
 import { Scene3 }   from "./scenes/Scene3.js";
 import { Scene4 }   from "./scenes/Scene4.js";
 import { Scene5 }   from "./scenes/Scene5.js";
+import { Scene6 }   from "./scenes/Scene6.js";
+import { Scene7 }   from "./scenes/Scene7.js";
+
 import Menu from "./gui/Menu.js";
 import Music from "./gui/Music.js";
 import showAbilitiesInfo from "./gui/AbilitiesInfo.js";
 
 const canvas = document.getElementById("gameCanvas");
-const engine = new GameEngine(canvas, 2000, 2000);
+const engine = new GameEngine(canvas, 1000, 1000);
 const sceneMgr = new SceneManager(engine);
 const music = new Music("assets/music.m4a", 0.3);
 sceneMgr.register("Scene1", Scene1);
 sceneMgr.register("Scene2", Scene2);
 sceneMgr.register("Scene3", Scene3);
-sceneMgr.register("Scene4", Scene3);
+sceneMgr.register("Scene4", Scene4);
 sceneMgr.register("Scene5", Scene5);
+sceneMgr.register("Scene6", Scene6);
+sceneMgr.register("Scene7", Scene7);
 engine.sceneManager = sceneMgr;
 
 
@@ -45,6 +50,6 @@ window.addEventListener("keydown", (e) => {
 
 export async function startGame() {
 	engine.start();
-    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene3" }));
+    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene7" }));
     engine.fadeIn(1);
 }
