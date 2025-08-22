@@ -2,10 +2,7 @@ export default class AbilityManager {
     constructor() {
         this.abilities = {
             globalTimeReverse: { uses: Infinity, max: Infinity, label: "Global Time Reverse" },
-            localTimeSlow:     { uses: 0, max: 0, label: "Local Time Slow" },
             localTimeStop:     { uses: 0, max: 0, label: "Local Time Stop" },
-            globalTimeSlow:    { uses: 0, max: 0, label: "Global Time Slow" },
-            timeReverseN:      { uses: 0, max: 0, label: "Time Reverse (N sec)", N: 3 }
         };
     }
 

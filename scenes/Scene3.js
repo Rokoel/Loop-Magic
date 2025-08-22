@@ -8,10 +8,7 @@ import GameEngine from "../engine/GameEngine.js"
 export const Scene3 = {
   init(engine) {
     engine.abilityManager.setAbility("globalTimeReverse", Infinity, Infinity);
-    engine.abilityManager.setAbility("localTimeSlow", 0, 0);
     engine.abilityManager.setAbility("localTimeStop", 0, 0);
-    engine.abilityManager.setAbility("globalTimeSlow", 0, 0);
-    engine.abilityManager.setAbility("timeReverseN", 0, 0, { N: 3 });
     engine.abilityManager.reset();
 
     engine.hud = new HUD(engine, engine.abilityManager);

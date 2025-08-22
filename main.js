@@ -7,6 +7,8 @@ import { Scene4 }   from "./scenes/Scene4.js";
 import { Scene5 }   from "./scenes/Scene5.js";
 import { Scene6 }   from "./scenes/Scene6.js";
 import { Scene7 }   from "./scenes/Scene7.js";
+import { Scene8 }   from "./scenes/Scene8.js";
+import { Scene9 }   from "./scenes/Scene9.js";
 
 import Menu from "./gui/Menu.js";
 import Music from "./gui/Music.js";
@@ -23,6 +25,8 @@ sceneMgr.register("Scene4", Scene4);
 sceneMgr.register("Scene5", Scene5);
 sceneMgr.register("Scene6", Scene6);
 sceneMgr.register("Scene7", Scene7);
+sceneMgr.register("Scene8", Scene8);
+sceneMgr.register("Scene9", Scene9);
 engine.sceneManager = sceneMgr;
 
 
@@ -50,6 +54,6 @@ window.addEventListener("keydown", (e) => {
 
 export async function startGame() {
 	engine.start();
-    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene7" }));
+    window.dispatchEvent(new CustomEvent("scene:change", { detail: "Scene1" }));
     engine.fadeIn(1);
 }

@@ -1,17 +1,15 @@
 import { Player, Platform } from "../engine/entities.js";
-import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES, SKY } from "../engine/textureLoader.js";
+import { RED_PLATFORM_TEXTURES, LIGHT_ROCK_TEXTURES, SKY, PLATFORM_TEXTURES } from "../engine/textureLoader.js";
 import BackgroundRect, { BG_MODE } from "../engine/BackgroundRect.js";
 import HUD from "../gui/HUD.js";
 import FullScreenImage from "../gui/FullScreenImage.js";
 import GameEngine from "../engine/GameEngine.js";
+import Vector2D from "../engine/Vector2D.js";
 
 export const Scene4 = {
   init(engine) {
     engine.abilityManager.setAbility("globalTimeReverse", Infinity, Infinity);
-    engine.abilityManager.setAbility("localTimeSlow", 0, 0);
     engine.abilityManager.setAbility("localTimeStop", 0, 0);
-    engine.abilityManager.setAbility("globalTimeSlow", 0, 0);
-    engine.abilityManager.setAbility("timeReverseN", 0, 0, { N: 3 });
     engine.abilityManager.reset();
 
     engine.hud = new HUD(engine, engine.abilityManager);
@@ -20,7 +18,11 @@ export const Scene4 = {
     engine.addGameObject(player);
 
     engine.addGameObject(new Platform(0, 500, 400, 40, false, RED_PLATFORM_TEXTURES));
-    engine.addGameObject(new Platform(500, 400, 300, 40, false, RED_PLATFORM_TEXTURES));
+    const jumpPlatform = new Platform(600, 450, 128, 50, false, LIGHT_ROCK_TEXTURES);
+    jumpPlatform.addTrigger((self, other) => {
+      other.velocity.y = -900;
+    });
+    engine.addGameObject(jumpPlatform);
     engine.addGameObject(new Platform(900, 300, 200, 40, false, RED_PLATFORM_TEXTURES));
 
     engine.addGameObject(new Platform(1300, 200, 300, 40, false, RED_PLATFORM_TEXTURES));
@@ -44,7 +46,14 @@ export const Scene4 = {
     engine.input.setEnabled(false);
     engine.textBox.show(
       "The boy has continued his ascent to the city with his newly realized powers.",
-      () => { engine.input.setEnabled(true); }
+      () => {
+        engine.textBox.show(
+          "He saw platforms that were able to launch him in the air, helping him reach platforms that were too high to jump to.",
+          () => {
+            engine.input.setEnabled(true);
+          }
+        );
+      }
     );
   },
   /**
