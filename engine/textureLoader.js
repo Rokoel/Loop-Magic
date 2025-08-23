@@ -1,37 +1,48 @@
+/**
+ * Loads one or more images and returns an array of HTMLImageElements.
+ * Always safe for itch.io and all browsers.
+ * @param {string|string[]} textures - Path or array of paths.
+ * @returns {Promise<HTMLImageElement[]>}
+ */
 async function returnTexture(textures) {
-  if (! Array.isArray(textures)) {
-    return await Promise.all([textures, ].map(async src => createImageBitmap(await fetch(src).then(r => r.blob()))));
-  }
-  return await Promise.all(textures.map(async src => createImageBitmap(await fetch(src).then(r => r.blob()))));
+  const sources = Array.isArray(textures) ? textures : [textures];
+  return Promise.all(
+    sources.map(
+      src =>
+        new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        })
+    )
+  );
 }
 
 /**
- * Loads an image for use with BG_MODE.IMAGE.
- * Returns a Promise that resolves to an ImageBitmap (preferred) or HTMLImageElement.
+ * Loads a single image for use with BG_MODE.IMAGE.
+ * Returns a Promise that resolves to an HTMLImageElement.
  * @param {string} src - Path to the image file.
- * @param {boolean} [asBitmap=true] - If true, returns ImageBitmap; else HTMLImageElement.
- * @returns {Promise<ImageBitmap|HTMLImageElement>}
+ * @returns {Promise<HTMLImageElement>}
  */
-export async function loadBGImage(src, asBitmap = true) {
-    if (asBitmap && 'createImageBitmap' in window) {
-        const blob = await fetch(src).then(r => r.blob());
-        return await createImageBitmap(blob);
-    } else {
-        return new Promise((resolve, reject) => {
-            const img = new window.Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = src;
-        });
-    }
+export async function loadBGImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
-export const LIGHT_ROCK_TEXTURES = await returnTexture("../assets/rock_tile.png");
+// Exported textures
+export const LIGHT_ROCK_TEXTURES   = await returnTexture("assets/rock_tile.png");
+export const PLATFORM_TEXTURES     = await returnTexture("assets/light_rock.png");
+export const RED_PLATFORM_TEXTURES = await returnTexture("assets/red_rock_tile.png");
 
-export const PLATFORM_TEXTURES = await returnTexture("../assets/light_rock.png");
+// Example: multiple sky variants
+export const SKY = await returnTexture([
+  "assets/lighter_sky.png",
+  "assets/darker_sky.png"
+]);
 
-export const RED_PLATFORM_TEXTURES = await returnTexture("../assets/red_rock_tile.png");
-
-export const SKY = await returnTexture(["../assets/lighter_sky.png", "../assets/darker_sky.png"]);
-
-export const MAGE_CITY = await loadBGImage("../assets/mage_city.png");
+export const MAGE_CITY = await loadBGImage("assets/mage_city.png");
